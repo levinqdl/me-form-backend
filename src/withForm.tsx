@@ -1,19 +1,29 @@
 import React, { ComponentType } from 'react'
-import { Consumer, ContextValue } from './Context'
+import { Consumer } from './Context'
 
 interface Props {
   name: string
 }
 
-type WrappedProps = ContextValue & { value: any }
+interface FormProps { value: any; onChange: Function }
 
 interface Options {
   parser?: (changedValue: any) => any
 }
 
-const withForm = ({parser= (value: any) => value}: Options = {}) => (Comp: ComponentType<WrappedProps>) => ({ name }: Props) => (
+const withForm: <WrappedProps extends FormProps>(
+  options: Options,
+) => (Comp: ComponentType<WrappedProps>) => ComponentType<Props> = ({
+  parser = (value: any) => value,
+} = {}) => Comp => ({ name, ...rest }) => (
   <Consumer>
-    {({ value, onChange }) => <Comp value={value[name]} onChange={v => onChange(parser(v), name)} />}
+    {({ value, onChange }) => (
+      <Comp
+        {...rest}
+        value={value[name]}
+        onChange={(v: any) => onChange(parser(v), name)}
+      />
+    )}
   </Consumer>
 )
 
