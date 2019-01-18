@@ -42,6 +42,8 @@ const Input = ({
   </FormItem>
 )
 
+const errorMessages = { required: 'f1 is required' }
+
 describe('Form', () => {
   it('renders children', () => {
     const { getByText } = render(<Form value={{}}>form content</Form>)
@@ -65,8 +67,20 @@ describe('Form', () => {
           label="f1"
           name="f1"
           validator={(v: string) => (v ? null : { rule: 'required' })}
-          errorMessages={{ required: 'f1 is required' }}
+          errorMessages={errorMessages}
         />
+      </Form>,
+    )
+    expect(queryByText('f1 is required')).toBeNull()
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'xxx' } })
+    fireEvent.change(input, { target: { value: '' } })
+    getByText('f1 is required')
+  })
+  it('validator shorthand: required', () => {
+    const { queryByText, getByLabelText, getByText } = render(
+      <Form value={{ f1: '' }}>
+        <Input label="f1" name="f1" required errorMessages={errorMessages} />
       </Form>,
     )
     expect(queryByText('f1 is required')).toBeNull()
