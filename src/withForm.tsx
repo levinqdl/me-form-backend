@@ -1,21 +1,45 @@
 import React, { ComponentType } from 'react'
 import { Consumer } from './Context'
+import { Omit, GetProps } from './typeUtils'
 
-interface Props {
+interface OwnProps {
   name: string
+  required?: boolean
 }
 
-interface FormProps { value: any; onChange: Function }
+interface InjectedProps {
+  value: any
+  onChange: Function
+}
 
 interface Options {
   parser?: (changedValue: any) => any
+  errorMessages?: {
+    required?: (label: string) => string
+  }
 }
 
-const withForm: <WrappedProps extends FormProps>(
-  options: Options,
-) => (Comp: ComponentType<WrappedProps>) => ComponentType<Props> = ({
+type Shared<
+  InjectedProps,
+  DecorationTargetProps extends Shared<InjectedProps, DecorationTargetProps>
+> = {
+  [P in Extract<
+    keyof InjectedProps,
+    keyof DecorationTargetProps
+  >]?: InjectedProps[P] extends DecorationTargetProps[P]
+    ? DecorationTargetProps[P]
+    : never
+}
+
+type InferableComponentEnhancer = <C extends ComponentType<GetProps<C>>>(
+  component: C,
+) => ComponentType<
+  OwnProps & Omit<GetProps<C>, keyof Shared<InjectedProps, GetProps<C>>>
+>
+
+const withForm: (options: Options) => InferableComponentEnhancer = ({
   parser = (value: any) => value,
-} = {}) => Comp => ({ name, ...rest }) => (
+} = {}) => (Comp: ComponentType<any>) => ({ name, ...rest }) => (
   <Consumer>
     {({ value, onChange }) => (
       <Comp
