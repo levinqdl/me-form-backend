@@ -89,4 +89,16 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: '' } })
     getByText('f1 is required')
   })
+  it('default error message is rule name', () => {
+    const { queryByText, getByLabelText, getByText } = render(
+      <Form value={{ f1: '' }}>
+        <Input label="f1" name="f1" required />
+      </Form>,
+    )
+    expect(queryByText('required')).toBeNull()
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'xxx' } })
+    fireEvent.change(input, { target: { value: '' } })
+    getByText('required')
+  })
 })

@@ -62,7 +62,11 @@ class FormItem extends React.Component<P, State> {
   render() {
     const { children, value, onChange, errorMessages, name } = this.props
     const { error } = this.state
-    const errorMsg = error ? errorMessages[error.rule] || error.rule : ''
+    const errorMsg = error
+      ? errorMessages
+        ? errorMessages[error.rule] || error.rule
+        : error.rule
+      : ''
     return children({ value: value[name], onChange, error: errorMsg })
   }
 }
