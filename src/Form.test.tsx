@@ -1,7 +1,14 @@
 import React, { ChangeEvent, ComponentType } from 'react'
-import { render, fireEvent, cleanup } from 'react-testing-library'
+import {
+  render,
+  fireEvent,
+  cleanup,
+  wait,
+  waitForDomChange,
+} from 'react-testing-library'
 import Form from './Form'
 import FormItem, { FormProps } from './FormItem'
+import { async } from 'q'
 
 afterEach(cleanup)
 
@@ -125,5 +132,25 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: '' } })
     getByText('f1 required')
     expect(queryByText('f2 required')).toBeNull()
+  })
+  it('submit and validate', async () => {
+    const handleSubmit = jest.fn()
+    const { getByLabelText, getByText } = render(
+      <Form value={{ f1: '' }} onSubmit={handleSubmit}>
+        {(submit: () => void) => (
+          <>
+            <Input label="f1" name="f1" required />
+            <button onClick={submit}>submit</button>
+          </>
+        )}
+      </Form>,
+    )
+    const submitButton = getByText('submit')
+    fireEvent.click(submitButton)
+    getByText('required')
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'f1 changed' } })
+    fireEvent.click(submitButton)
+    expect(handleSubmit).toBeCalled()
   })
 })

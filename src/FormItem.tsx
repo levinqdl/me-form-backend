@@ -36,12 +36,22 @@ interface State {
   error: ValidatorResult
 }
 
-class FormItem extends React.Component<P, State> {
+export class FormItem extends React.Component<P, State> {
   constructor(props: P) {
     super(props)
     this.state = {
       error: null,
     }
+  }
+  validate = () => {
+    const { value, name } = this.props
+    const validator = this.getValidator()
+    let error = null
+    if (validator) {
+      error = validator(value[name])
+    }
+    this.setState({ error })
+    return error
   }
   getValidator() {
     const { validator, required } = this.props
@@ -50,14 +60,13 @@ class FormItem extends React.Component<P, State> {
     }
     return validator
   }
+  componentDidMount() {
+    this.props.register(this.props.name, this)
+  }
   componentDidUpdate(prevProps: P) {
     const { value, name } = this.props
     if (value[name] !== prevProps.value[name]) {
-      const validator = this.getValidator()
-      if (validator) {
-        const error = validator(value[name])
-        this.setState({ error })
-      }
+      this.validate()
     }
   }
   getError() {

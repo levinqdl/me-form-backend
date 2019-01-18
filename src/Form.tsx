@@ -1,20 +1,24 @@
 import React, { ReactNode } from 'react'
-import { Provider } from './Context'
+import { Provider, ContextValue } from './Context'
+import { FormItem } from './FormItem'
 
 export interface Value {
-    [key:string]: any
+  [key: string]: any
 }
 
 interface Props {
   value: Value
-  children: ReactNode
+  children: any
+  onSubmit?: () => void
 }
 
-interface State {
-  value: Value
-}
-
-class Form extends React.Component<Props, State> {
+class Form extends React.Component<Props, ContextValue> {
+  submit = () => {
+    const { onSubmit } = this.props
+    if (!this.validate() && onSubmit) {
+      onSubmit()
+    }
+  }
   onChange = (v: any, field: string) => {
     this.setState(({ value }) => ({
       value: {
@@ -23,15 +27,33 @@ class Form extends React.Component<Props, State> {
       },
     }))
   }
+  validate = () => {
+    for (const item of this.items.values()) {
+      const error = item.validate()
+      if (error) {
+        console.log(error)
+        return error
+      }
+    }
+    return null
+  }
+  items: Map<string, FormItem> = new Map()
+  register = (name: string, item: FormItem) => {
+    this.items.set(name, item)
+    return () => {
+      this.items.delete(name)
+    }
+  }
   state = {
     value: this.props.value,
     onChange: this.onChange,
+    register: this.register,
   }
   render() {
     const { children } = this.props
     return (
       <Provider value={this.state}>
-        <form>{children}</form>
+        {typeof children === 'function' ? children(this.submit) : children}
       </Provider>
     )
   }
