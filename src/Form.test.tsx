@@ -32,7 +32,7 @@ const Input = ({
     {({ value, onChange, error }: any) => (
       <>
         <NativeInput
-          value={value[name]}
+          value={value}
           onChange={({ target: { value } }) => onChange(value, name)}
           label={label}
         />
