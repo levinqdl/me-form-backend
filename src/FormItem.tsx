@@ -67,7 +67,11 @@ class FormItem extends React.Component<P, State> {
         ? errorMessages[error.rule] || error.rule
         : error.rule
       : ''
-    return children({ value: value[name], onChange, error: errorMsg })
+    return children({
+      value: value[name],
+      onChange: (value: any) => onChange(value, name),
+      error: errorMsg,
+    })
   }
 }
 
