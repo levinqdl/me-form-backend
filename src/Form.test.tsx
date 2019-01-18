@@ -36,7 +36,7 @@ const Input = ({
           onChange={({ target: { value } }) => onChange(value)}
           label={label}
         />
-        {error}
+        <span>{error}</span>
       </>
     )}
   </FormItem>
@@ -100,5 +100,30 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'xxx' } })
     fireEvent.change(input, { target: { value: '' } })
     getByText('required')
+  })
+  it('validator not triggered by other fields', () => {
+    const { queryByText, getByLabelText, getByText } = render(
+      <Form value={{ f1: '' }}>
+        <Input
+          label="f1"
+          name="f1"
+          required
+          errorMessages={{ required: 'f1 required' }}
+        />
+        <Input
+          label="f2"
+          name="f2"
+          required
+          errorMessages={{ required: 'f2 required' }}
+        />
+      </Form>,
+    )
+    expect(queryByText('f1 required')).toBeNull()
+    expect(queryByText('f2 required')).toBeNull()
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'xxx' } })
+    fireEvent.change(input, { target: { value: '' } })
+    getByText('f1 required')
+    expect(queryByText('f2 required')).toBeNull()
   })
 })

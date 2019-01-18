@@ -35,6 +35,7 @@ type P = ContextValue & FormItemProps & { children: (x: any) => any }
 interface State {
   error: ValidatorResult
 }
+
 class FormItem extends React.Component<P, State> {
   constructor(props: P) {
     super(props)
@@ -50,8 +51,8 @@ class FormItem extends React.Component<P, State> {
     return validator
   }
   componentDidUpdate(prevProps: P) {
-    const { value, validator, name, required } = this.props
-    if (value !== prevProps.value) {
+    const { value, name } = this.props
+    if (value[name] !== prevProps.value[name]) {
       const validator = this.getValidator()
       if (validator) {
         const error = validator(value[name])
@@ -59,18 +60,21 @@ class FormItem extends React.Component<P, State> {
       }
     }
   }
-  render() {
-    const { children, value, onChange, errorMessages, name } = this.props
+  getError() {
+    const { errorMessages } = this.props
     const { error } = this.state
-    const errorMsg = error
+    return error
       ? errorMessages
         ? errorMessages[error.rule] || error.rule
         : error.rule
       : ''
+  }
+  render() {
+    const { children, value, onChange, name } = this.props
     return children({
       value: value[name],
       onChange: (value: any) => onChange(value, name),
-      error: errorMsg,
+      error: this.getError(),
     })
   }
 }
