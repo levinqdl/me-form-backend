@@ -28,14 +28,11 @@ class Form extends React.Component<Props, ContextValue> {
     }))
   }
   validate = () => {
+    let error
     for (const item of this.items.values()) {
-      const error = item.validate()
-      if (error) {
-        console.log(error)
-        return error
-      }
+      error = item.validate()
     }
-    return null
+    return error
   }
   items: Map<string, FormItem> = new Map()
   register = (name: string, item: FormItem) => {

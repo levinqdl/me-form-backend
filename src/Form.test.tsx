@@ -136,10 +136,21 @@ describe('Form', () => {
   it('submit and validate', async () => {
     const handleSubmit = jest.fn()
     const { getByLabelText, getByText } = render(
-      <Form value={{ f1: '' }} onSubmit={handleSubmit}>
+      <Form value={{ f1: '', f2: '' }} onSubmit={handleSubmit}>
         {(submit: () => void) => (
           <>
-            <Input label="f1" name="f1" required />
+            <Input
+              label="f1"
+              name="f1"
+              required
+              errorMessages={{ required: 'f1 required' }}
+            />
+            <Input
+              label="f2"
+              name="f2"
+              required
+              errorMessages={{ required: 'f2 required' }}
+            />
             <button onClick={submit}>submit</button>
           </>
         )}
@@ -147,9 +158,12 @@ describe('Form', () => {
     )
     const submitButton = getByText('submit')
     fireEvent.click(submitButton)
-    getByText('required')
-    const input = getByLabelText('f1')
-    fireEvent.change(input, { target: { value: 'f1 changed' } })
+    getByText('f1 required')
+    getByText('f2 required')
+    const input1 = getByLabelText('f1')
+    const input2 = getByLabelText('f2')
+    fireEvent.change(input1, { target: { value: 'f1 changed' } })
+    fireEvent.change(input2, { target: { value: 'f2 changed' } })
     fireEvent.click(submitButton)
     expect(handleSubmit).toBeCalled()
   })
