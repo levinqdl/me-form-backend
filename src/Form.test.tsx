@@ -128,7 +128,7 @@ describe('Form', () => {
   })
   it('submit and validate', async () => {
     const handleSubmit = jest.fn()
-    const { getByLabelText, getByText } = render(
+    const { getByLabelText, getByText, getByTestId } = render(
       <Form initValue={{ f1: '', f2: '' }} onSubmit={handleSubmit}>
         {(submit: () => void) => (
           <>
@@ -144,7 +144,9 @@ describe('Form', () => {
               required
               errorMessages={{ required: 'f2 required' }}
             />
-            <button onClick={submit}>submit</button>
+            <button onClick={submit} type="button">
+              submit
+            </button>
           </>
         )}
       </Form>,

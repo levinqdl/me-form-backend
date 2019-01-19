@@ -13,6 +13,10 @@ interface Props {
 }
 
 class Form extends React.Component<Props, ContextValue> {
+  submitEventHandler = (e: any) => {
+    e.preventDefault()
+    this.submit()
+  }
   submit = () => {
     const { onSubmit } = this.props
     if (!this.validate() && onSubmit) {
@@ -50,7 +54,9 @@ class Form extends React.Component<Props, ContextValue> {
     const { children } = this.props
     return (
       <Provider value={this.state}>
-        {typeof children === 'function' ? children(this.submit) : children}
+        <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
+          {typeof children === 'function' ? children(this.submit) : children}
+        </form>
       </Provider>
     )
   }
