@@ -1,14 +1,7 @@
 import React, { ChangeEvent, ComponentType } from 'react'
-import {
-  render,
-  fireEvent,
-  cleanup,
-  wait,
-  waitForDomChange,
-} from 'react-testing-library'
+import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form from './Form'
 import FormItem, { FormProps } from './FormItem'
-import { async } from 'q'
 
 afterEach(cleanup)
 
@@ -53,12 +46,12 @@ const errorMessages = { required: 'f1 is required' }
 
 describe('Form', () => {
   it('renders children', () => {
-    const { getByText } = render(<Form value={{}}>form content</Form>)
+    const { getByText } = render(<Form initValue={{}}>form content</Form>)
     getByText('form content')
   })
   it('provide value & onChange for fields', () => {
     const { getByLabelText } = render(
-      <Form value={{ f1: 'a' }}>
+      <Form initValue={{ f1: 'a' }}>
         <Input label="f1" name="f1" />
       </Form>,
     )
@@ -69,7 +62,7 @@ describe('Form', () => {
   })
   it('validator triggered after touched', () => {
     const { getByLabelText, queryByText, getByText } = render(
-      <Form value={{ f1: '' }}>
+      <Form initValue={{ f1: '' }}>
         <Input
           label="f1"
           name="f1"
@@ -86,7 +79,7 @@ describe('Form', () => {
   })
   it('validator shorthand: required', () => {
     const { queryByText, getByLabelText, getByText } = render(
-      <Form value={{ f1: '' }}>
+      <Form initValue={{ f1: '' }}>
         <Input label="f1" name="f1" required errorMessages={errorMessages} />
       </Form>,
     )
@@ -98,7 +91,7 @@ describe('Form', () => {
   })
   it('default error message is rule name', () => {
     const { queryByText, getByLabelText, getByText } = render(
-      <Form value={{ f1: '' }}>
+      <Form initValue={{ f1: '' }}>
         <Input label="f1" name="f1" required />
       </Form>,
     )
@@ -110,7 +103,7 @@ describe('Form', () => {
   })
   it('validator not triggered by other fields', () => {
     const { queryByText, getByLabelText, getByText } = render(
-      <Form value={{ f1: '' }}>
+      <Form initValue={{ f1: '' }}>
         <Input
           label="f1"
           name="f1"
@@ -136,7 +129,7 @@ describe('Form', () => {
   it('submit and validate', async () => {
     const handleSubmit = jest.fn()
     const { getByLabelText, getByText } = render(
-      <Form value={{ f1: '', f2: '' }} onSubmit={handleSubmit}>
+      <Form initValue={{ f1: '', f2: '' }} onSubmit={handleSubmit}>
         {(submit: () => void) => (
           <>
             <Input

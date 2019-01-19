@@ -7,16 +7,16 @@ export interface Value {
 }
 
 interface Props {
-  value: Value
+  initValue: Value
   children: any
-  onSubmit?: () => void
+  onSubmit?: (value: Value) => void
 }
 
 class Form extends React.Component<Props, ContextValue> {
   submit = () => {
     const { onSubmit } = this.props
     if (!this.validate() && onSubmit) {
-      onSubmit()
+      onSubmit(this.state.value)
     }
   }
   onChange = (v: any, field: string) => {
@@ -42,7 +42,7 @@ class Form extends React.Component<Props, ContextValue> {
     }
   }
   state = {
-    value: this.props.value,
+    value: this.props.initValue,
     onChange: this.onChange,
     register: this.register,
   }
