@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "description": "compose awesome forms",
   "main": "dist/index.js",
+  "types": "src/index.ts",
   "repository": "git@github.com:levinqdl/me-form-backend.git",
   "author": "Qu Delin <levinqdl@gmail.com>",
   "license": "MIT",
