@@ -81,12 +81,16 @@ export class FormItem extends React.Component<P, State> {
       : ''
   }
   render() {
-    const { children, value, onChange, name } = this.props
-    return children({
-      value: value[name],
-      onChange: (value: any) => onChange(value, name),
-      error: this.getError(),
-    })
+    const { children, value, onChange, name, resetError } = this.props
+    return (
+      <span onFocus={resetError}>
+        {children({
+          value: value[name],
+          onChange: (value: any) => onChange(value, name),
+          error: this.getError(),
+        })}
+      </span>
+    )
   }
 }
 

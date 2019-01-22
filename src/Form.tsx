@@ -59,10 +59,14 @@ class Form extends React.Component<Props, State> {
       this.items.delete(name)
     }
   }
+  resetError = () => {
+    this.setState({ error: null })
+  }
   state: State = {
     value: this.props.initValue,
     onChange: this.onChange,
     register: this.register,
+    resetError: this.resetError,
     error: null,
   }
   getError() {

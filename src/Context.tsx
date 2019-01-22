@@ -6,12 +6,14 @@ export interface ContextValue {
   value: Value
   onChange: (v: any, field: string) => void
   register: (name: string, formItem: FormItem) => () => void
+  resetError: () => void
 }
 
 const { Provider, Consumer } = createContext<ContextValue>({
   value: {},
   onChange: () => {},
   register: (item, name) => () => {},
+  resetError: () => {},
 })
 
 export { Provider, Consumer }

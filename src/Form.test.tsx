@@ -176,6 +176,8 @@ describe('Form', () => {
     expect(queryByText('f1 required')).toBeNull()
     expect(queryByText('f2 required')).toBeNull()
     getByText('f1 & f2 should be equal')
+    fireEvent.focus(input2)
+    expect(queryByText('f1 & f2 should be equal')).toBeNull()
     fireEvent.change(input2, { target: { value: 'f1 changed' } })
     fireEvent.click(submitButton)
     expect(handleSubmit).toBeCalled()
