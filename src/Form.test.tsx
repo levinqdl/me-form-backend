@@ -1,6 +1,6 @@
 import React, { ChangeEvent, ComponentType } from 'react'
 import { render, fireEvent, cleanup } from 'react-testing-library'
-import Form from './Form'
+import Form, { Value } from './Form'
 import FormItem, { FormProps } from './FormItem'
 
 afterEach(cleanup)
@@ -46,7 +46,11 @@ const errorMessages = { required: 'f1 is required' }
 
 describe('Form', () => {
   it('renders children', () => {
-    const { getByText } = render(<Form initValue={{}}>form content</Form>)
+    const { getByText } = render(
+      <Form initValue={{}}>
+        <span>form content</span>
+      </Form>,
+    )
     getByText('form content')
   })
   it('provide value & onChange for fields', () => {
@@ -128,9 +132,16 @@ describe('Form', () => {
   })
   it('submit and validate', async () => {
     const handleSubmit = jest.fn()
-    const { getByLabelText, getByText, getByTestId } = render(
-      <Form initValue={{ f1: '', f2: '' }} onSubmit={handleSubmit}>
-        {(submit: () => void) => (
+    const { getByLabelText, getByText, getByTestId, queryByText } = render(
+      <Form
+        initValue={{ f1: '', f2: '' }}
+        onSubmit={handleSubmit}
+        validator={({ f1, f2 }: Value) =>
+          f1 === f2 ? null : { rule: 'equal' }
+        }
+        errorMessages={{ equal: 'f1 & f2 should be equal' }}
+      >
+        {({ submit, error }) => (
           <>
             <Input
               label="f1"
@@ -144,6 +155,7 @@ describe('Form', () => {
               required
               errorMessages={{ required: 'f2 required' }}
             />
+            <span>{error}</span>
             <button onClick={submit} type="button">
               submit
             </button>
@@ -153,12 +165,18 @@ describe('Form', () => {
     )
     const submitButton = getByText('submit')
     fireEvent.click(submitButton)
+    expect(handleSubmit).not.toBeCalled()
     getByText('f1 required')
     getByText('f2 required')
     const input1 = getByLabelText('f1')
     const input2 = getByLabelText('f2')
     fireEvent.change(input1, { target: { value: 'f1 changed' } })
     fireEvent.change(input2, { target: { value: 'f2 changed' } })
+    fireEvent.click(submitButton)
+    expect(queryByText('f1 required')).toBeNull()
+    expect(queryByText('f2 required')).toBeNull()
+    getByText('f1 & f2 should be equal')
+    fireEvent.change(input2, { target: { value: 'f1 changed' } })
     fireEvent.click(submitButton)
     expect(handleSubmit).toBeCalled()
   })

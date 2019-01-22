@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, ReactElement } from 'react'
 import { Provider, ContextValue } from './Context'
-import { FormItem } from './FormItem'
+import { FormItem, ValidatorResult, ErrorMessages } from './FormItem'
 
 export interface Value {
   [key: string]: any
@@ -8,11 +8,20 @@ export interface Value {
 
 interface Props {
   initValue: Value
-  children: any
+  children:
+    | ReactElement<any>
+    | Array<ReactElement<any>>
+    | ((form: { submit: () => void; error: string }) => ReactElement<any>)
   onSubmit?: (value: Value) => void
+  validator?: (value: Value) => ValidatorResult
+  errorMessages?: ErrorMessages
 }
 
-class Form extends React.Component<Props, ContextValue> {
+type State = ContextValue & {
+  error: ValidatorResult
+}
+
+class Form extends React.Component<Props, State> {
   submitEventHandler = (e: any) => {
     e.preventDefault()
     this.submit()
@@ -36,6 +45,11 @@ class Form extends React.Component<Props, ContextValue> {
     for (const item of this.items.values()) {
       error = item.validate()
     }
+    const { validator } = this.props
+    if (!error && validator) {
+      error = validator(this.state.value)
+      this.setState({ error })
+    }
     return error
   }
   items: Map<string, FormItem> = new Map()
@@ -45,17 +59,30 @@ class Form extends React.Component<Props, ContextValue> {
       this.items.delete(name)
     }
   }
-  state = {
+  state: State = {
     value: this.props.initValue,
     onChange: this.onChange,
     register: this.register,
+    error: null,
+  }
+  getError() {
+    const { errorMessages } = this.props
+    const { error } = this.state
+    return error
+      ? errorMessages
+        ? errorMessages[error.rule] || error.rule
+        : error.rule
+      : ''
   }
   render() {
     const { children } = this.props
+    const { error, ...contextValue } = this.state
     return (
-      <Provider value={this.state}>
+      <Provider value={contextValue}>
         <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
-          {typeof children === 'function' ? children(this.submit) : children}
+          {typeof children === 'function'
+            ? children({ submit: this.submit, error: this.getError() })
+            : children}
         </form>
       </Provider>
     )

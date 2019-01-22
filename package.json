@@ -29,7 +29,7 @@
   },
   "scripts": {
     "start": "rollup -c rollup.config.js -w",
-    "test": "jest",
+    "test": "jest --verbose false",
     "build": "rollup -c rollup.config.js"
   },
   "husky": {

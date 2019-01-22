@@ -4,17 +4,19 @@ import { ElementTypeOf, Omit } from './typeUtils'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
 
-interface ValidatorResult {
+export interface ValidatorResult {
   rule: string
+}
+
+export interface ErrorMessages {
+  [key: string]: string
 }
 
 interface FormItemProps {
   name: string
   required?: boolean
   validator?: (value: string) => ValidatorResult
-  errorMessages?: {
-    [key: string]: string
-  }
+  errorMessages?: ErrorMessages
   children: any
 }
 
