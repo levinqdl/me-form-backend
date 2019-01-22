@@ -130,7 +130,7 @@ describe('Form', () => {
     getByText('f1 required')
     expect(queryByText('f2 required')).toBeNull()
   })
-  it('submit and validate', async () => {
+  it('submit and validate', () => {
     const handleSubmit = jest.fn()
     const { getByLabelText, getByText, getByTestId, queryByText } = render(
       <Form
@@ -181,5 +181,24 @@ describe('Form', () => {
     fireEvent.change(input2, { target: { value: 'f1 changed' } })
     fireEvent.click(submitButton)
     expect(handleSubmit).toBeCalled()
+  })
+  it('predefined validator: minLength', () => {
+    const { getByText, getByLabelText, queryByText } = render(
+      <Form initValue={{ f1: '' }}>
+        {() => (
+          <Input
+            label="f1"
+            name="f1"
+            minLength={5}
+            errorMessages={{ minLength: 'length should not less than 5' }}
+          />
+        )}
+      </Form>,
+    )
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'f1va' } })
+    getByText('length should not less than 5')
+    fireEvent.change(input, { target: { value: 'f1val' } })
+    expect(queryByText('length should not less than 5')).toBeNull()
   })
 })

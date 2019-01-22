@@ -15,6 +15,7 @@ export interface ErrorMessages {
 interface FormItemProps {
   name: string
   required?: boolean
+  minLength?: number
   validator?: (value: string) => ValidatorResult
   errorMessages?: ErrorMessages
   children: any
@@ -56,9 +57,13 @@ export class FormItem extends React.Component<P, State> {
     return error
   }
   getValidator() {
-    const { validator, required } = this.props
+    const { validator, required, minLength } = this.props
     if (required) {
       return (value: string) => (value ? null : { rule: 'required' })
+    }
+    if (minLength) {
+      return (value: string) =>
+        value.length >= minLength ? null : { rule: 'minLength' }
     }
     return validator
   }
