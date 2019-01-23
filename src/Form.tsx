@@ -6,8 +6,21 @@ export interface Value {
   [key: string]: any
 }
 
-interface Props {
+interface UncontrolledModeProps {
   initValue: Value
+}
+
+interface ControlledModeProps {
+  value: Value
+  onChange: (value: Value) => void
+}
+
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
+type XOR<T, U> = (T | U) extends object
+  ? (Without<T, U> & U) | (Without<U, T> & T)
+  : T | U
+
+type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
   children:
     | ReactElement<any>
     | Array<ReactElement<any>>
@@ -22,6 +35,9 @@ type State = ContextValue & {
 }
 
 class Form extends React.Component<Props, State> {
+  isControlled() {
+    return 'value' in this.props
+  }
   submitEventHandler = (e: any) => {
     e.preventDefault()
     this.submit()
@@ -33,12 +49,17 @@ class Form extends React.Component<Props, State> {
     }
   }
   onChange = (v: any, field: string) => {
-    this.setState(({ value }) => ({
-      value: {
-        ...value,
-        [field]: v,
-      },
-    }))
+    const { value, onChange } = this.props
+    if (onChange) {
+      onChange({ ...value, [field]: v })
+    } else {
+      this.setState(({ value }) => ({
+        value: {
+          ...value,
+          [field]: v,
+        },
+      }))
+    }
   }
   validate = () => {
     let error
@@ -63,7 +84,7 @@ class Form extends React.Component<Props, State> {
     this.setState({ error: null })
   }
   state: State = {
-    value: this.props.initValue,
+    value: this.isControlled() ? this.props.value : this.props.initValue,
     onChange: this.onChange,
     register: this.register,
     resetError: this.resetError,
@@ -77,6 +98,16 @@ class Form extends React.Component<Props, State> {
         ? errorMessages[error.rule] || error.rule
         : error.rule
       : ''
+  }
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if ('value' in props) {
+      return {
+        ...state,
+        value: props.value,
+      }
+    } else {
+      return null
+    }
   }
   render() {
     const { children } = this.props

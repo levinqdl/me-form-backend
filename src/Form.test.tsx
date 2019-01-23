@@ -201,4 +201,21 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'f1val' } })
     expect(queryByText('length should not less than 5')).toBeNull()
   })
+  it('has controlled mode', () => {
+    const handleChange = jest.fn()
+    const { getByLabelText, rerender } = render(
+      <Form value={{ f1: '' }} onChange={handleChange}>
+        <Input label="f1" name="f1" />
+      </Form>,
+    )
+    const input = getByLabelText('f1')
+    fireEvent.change(input, { target: { value: 'f1 changed' } })
+    expect(handleChange).toHaveBeenCalledWith({ f1: 'f1 changed' })
+    rerender(
+      <Form value={{ f1: 'f1 changed' }} onChange={handleChange}>
+        <Input label="f1" name="f1" />
+      </Form>,
+    )
+    expect(input).toHaveAttribute('value', 'f1 changed')
+  })
 })
