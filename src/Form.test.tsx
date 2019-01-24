@@ -32,7 +32,7 @@ const Input = ({
     {({ value, onChange, error }: any) => (
       <>
         <NativeInput
-          value={value}
+          value={value || ''}
           onChange={({ target: { value } }) => onChange(value)}
           label={label}
         />
@@ -217,5 +217,29 @@ describe('Form', () => {
       </Form>,
     )
     expect(input).toHaveAttribute('value', 'f1 changed')
+  })
+})
+
+describe('multi-layer form', () => {
+  it('pass value down to deepest layer', () => {
+    const handleSubmit = jest.fn()
+    const { getByLabelText, getByText } = render(
+      <Form initValue={{ a: { b: '' } }} onSubmit={handleSubmit}>
+        {({ submit }) => (
+          <>
+            <FormItem name="a">{() => <Input name="b" label="b" />}</FormItem>
+            <button type="button" onClick={submit}>
+              submit
+            </button>
+          </>
+        )}
+      </Form>,
+    )
+    const input = getByLabelText('b')
+    fireEvent.change(input, { target: { value: 'b changed' } })
+    expect(input).toHaveAttribute('value', 'b changed')
+    const submit = getByText('submit')
+    fireEvent.click(submit)
+    expect(handleSubmit).toHaveBeenCalledWith({ a: { b: 'b changed' } })
   })
 })

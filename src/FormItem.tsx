@@ -1,5 +1,5 @@
 import React, { ReactElement, ComponentType } from 'react'
-import { Consumer, ContextValue } from './Context'
+import { Provider, Consumer, ContextValue } from './Context'
 import { ElementTypeOf, Omit } from './typeUtils'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
@@ -85,16 +85,31 @@ export class FormItem extends React.Component<P, State> {
         : error.rule
       : ''
   }
+  register = () => () => {}
+  resetError = () => {}
   render() {
     const { children, value, onChange, name, resetError } = this.props
     return (
-      <span onFocus={resetError}>
-        {children({
+      <Provider
+        value={{
           value: value[name],
-          onChange: (value: any) => onChange(value, name),
-          error: this.getError(),
-        })}
-      </span>
+          onChange: (val: any, fieldName: string) => {
+            const target = value[name]
+            target[fieldName] = val
+            onChange(target, name)
+          },
+          register: this.register,
+          resetError: this.resetError,
+        }}
+      >
+        <span onFocus={resetError}>
+          {children({
+            value: value[name],
+            onChange: (value: any) => onChange(value, name),
+            error: this.getError(),
+          })}
+        </span>
+      </Provider>
     )
   }
 }
