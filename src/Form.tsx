@@ -2,6 +2,7 @@ import React, { ReactNode, ReactElement } from 'react'
 import { Provider, ContextValue } from './Context'
 import { FormItem, ValidatorResult, ErrorMessages } from './FormItem'
 import { XOR } from './typeUtils'
+import { fromJS } from 'immutable'
 
 export type Value = {
   [key: string]: any
@@ -41,13 +42,13 @@ class Form extends React.Component<Props, State> {
   submit = () => {
     const { onSubmit } = this.props
     if (!this.validate() && onSubmit) {
-      onSubmit(this.state.value)
+      onSubmit(this.state.value.toJS())
     }
   }
   onChange = (value: any) => {
     const { onChange } = this.props
     if (onChange) {
-      onChange(value)
+      onChange(value.toJS())
     } else {
       this.setState({ value })
     }
@@ -59,7 +60,7 @@ class Form extends React.Component<Props, State> {
     }
     const { validator } = this.props
     if (!error && validator) {
-      error = validator(this.state.value)
+      error = validator(this.state.value.toJS())
       this.setState({ error })
     }
     return error
@@ -75,7 +76,9 @@ class Form extends React.Component<Props, State> {
     this.setState({ error: null })
   }
   state: State = {
-    value: this.isControlled() ? this.props.value : this.props.initValue,
+    value: fromJS(
+      this.isControlled() ? this.props.value : this.props.initValue,
+    ),
     onChange: this.onChange,
     register: this.register,
     resetError: this.resetError,
@@ -94,7 +97,7 @@ class Form extends React.Component<Props, State> {
     if ('value' in props) {
       return {
         ...state,
-        value: props.value,
+        value: fromJS(props.value),
       }
     } else {
       return null

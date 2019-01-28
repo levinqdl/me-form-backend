@@ -44,5 +44,8 @@
         "git add"
       ]
     }
+  },
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12"
   }
 }

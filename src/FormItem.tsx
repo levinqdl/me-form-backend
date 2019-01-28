@@ -1,10 +1,10 @@
 import React, { ReactElement, ComponentType, ReactNode } from 'react'
 import { Provider, Consumer, ContextValue } from './Context'
-import { ElementTypeOf, Omit, XOR } from './typeUtils'
+import { ElementTypeOf, Omit } from './typeUtils'
 import changeHandler from './changeHandler'
-import { error } from 'util'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
+import { isImmutable, is } from 'immutable'
 
 export interface ValidatorResult {
   rule: string
@@ -16,10 +16,10 @@ export interface ErrorMessages {
 }
 
 type FormItemProps = {
-  name: string
+  name?: string
   required?: boolean
   minLength?: number
-  validator?: (value: string) => ValidatorResult
+  validator?: (value: any) => ValidatorResult
   errorMessages?: ErrorMessages
   children:
     | ((props: {
@@ -60,7 +60,7 @@ export class FormItem extends React.Component<P, State> {
     const validator = this.getValidator()
     let error = null
     if (validator) {
-      error = validator(value)
+      error = validator(isImmutable(value) ? value.toJS() : value)
     }
     this.setState({ error })
     return error
@@ -81,7 +81,7 @@ export class FormItem extends React.Component<P, State> {
   }
   componentDidUpdate(prevProps: P) {
     const { value } = this.props
-    if (value !== prevProps.value) {
+    if (!is(value, prevProps.value)) {
       this.validate()
     }
   }
@@ -95,8 +95,8 @@ export class FormItem extends React.Component<P, State> {
           : error.rule
         : ''
       return {
-        ...error,
         message,
+        ...error,
       }
     } else {
       return null
@@ -108,7 +108,7 @@ export class FormItem extends React.Component<P, State> {
     const { children, value, onChange } = this.props
     return typeof children === 'function'
       ? children({
-          value,
+          value: isImmutable(value) ? value.toJS() : value,
           onChange,
           error: this.getError(),
         })
@@ -137,7 +137,7 @@ const ConnectedFormItem: ComponentType<FormItemProps> = ({
 }) => (
   <Consumer>
     {({ value, onChange, ...context }) => {
-      const target = name ? value[name] : value
+      const target = name ? value.get(name) : value
       return (
         <FormItem
           value={target}

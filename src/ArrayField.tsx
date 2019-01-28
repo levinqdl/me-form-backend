@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import { Provider, Consumer } from './Context'
 import changeHandler from './changeHandler'
+import { isImmutable } from 'immutable'
 
 interface ChildParam {
   index: number
@@ -16,7 +17,7 @@ interface Props {
 const ArrayField = ({ name, children }: Props) => (
   <Consumer>
     {({ value, onChange }) => {
-      const target = name !== undefined && name !== '' ? value[name] : value
+      const target = name !== undefined && name !== '' ? value.get(name) : value
       const handleChange = changeHandler(value, name, onChange)
       return target.map((val: any, index: number) => (
         <Provider
@@ -30,10 +31,10 @@ const ArrayField = ({ name, children }: Props) => (
         >
           {children({
             index,
-            value: val,
+            value: isImmutable(val) ? val.toJS() : val,
             remove: () => {
-              target.splice(index, 1)
-              handleChange(target)
+              const x = target.delete(index)
+              handleChange(x)
             },
           })}
         </Provider>

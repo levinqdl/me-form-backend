@@ -247,7 +247,12 @@ describe('multi-layer form', () => {
   })
   it('iterate over iterable value', () => {
     const { getByLabelText, getByText, queryByLabelText } = render(
-      <Form initValue={{ a: ['f1', 'f2'], b: ['f3', 'f4'] }}>
+      <Form
+        initValue={{
+          a: ['f1', 'f2'],
+          b: [{ id: 'x', name: 'f3' }, { id: 'y', name: 'f4' }],
+        }}
+      >
         {() => (
           <>
             <ArrayField name="a">
@@ -260,11 +265,11 @@ describe('multi-layer form', () => {
             </ArrayField>
             <FormItem name="b">
               <ArrayField>
-                {({ index, remove }) => (
-                  <React.Fragment key={index}>
-                    <Input name="" label={`b${index}`} />
-                    <button onClick={remove}>remove b{index}</button>
-                  </React.Fragment>
+                {({ value, remove }) => (
+                  <FormItem key={value.id}>
+                    <Input name="name" label={value.id} />
+                    <button onClick={remove}>remove {value.id}</button>
+                  </FormItem>
                 )}
               </ArrayField>
             </FormItem>
@@ -274,8 +279,8 @@ describe('multi-layer form', () => {
     )
     const input1 = getByLabelText('a0')
     const input2 = getByLabelText('a1')
-    const input3 = getByLabelText('b0')
-    const input4 = getByLabelText('b1')
+    const input3 = getByLabelText('x')
+    const input4 = getByLabelText('y')
     expect(input1).toHaveAttribute('value', 'f1')
     expect(input2).toHaveAttribute('value', 'f2')
     expect(input3).toHaveAttribute('value', 'f3')
@@ -286,9 +291,42 @@ describe('multi-layer form', () => {
     const remove2 = getByText('remove a1')
     fireEvent.click(remove2)
     expect(queryByLabelText('a1')).toBeNull()
-    const remove4 = getByText('remove b1')
+    const remove4 = getByText('remove y')
     fireEvent.click(remove4)
 
     expect(queryByLabelText('b1')).toBeNull()
+  })
+  it('middle layer validator', () => {
+    const handleSubmit = jest.fn()
+    const { getByLabelText, getByText } = render(
+      <Form initValue={{ a: { b: '', c: '' } }} onSubmit={handleSubmit}>
+        {({ submit }) => (
+          <>
+            <FormItem
+              name="a"
+              validator={({ b, c }) =>
+                b !== c
+                  ? { rule: 'equal', message: 'b and c should be equal' }
+                  : null
+              }
+            >
+              {({ error }) => (
+                <>
+                  <Input name="b" label="b" />
+                  <Input name="c" label="c" />
+                  {error && <span>{error.message}</span>}
+                </>
+              )}
+            </FormItem>
+            <button type="button" onClick={submit}>
+              submit
+            </button>
+          </>
+        )}
+      </Form>,
+    )
+    const c = getByLabelText('c')
+    fireEvent.change(c, { target: { value: 'x' } })
+    getByText('b and c should be equal')
   })
 })
