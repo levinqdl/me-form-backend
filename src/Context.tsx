@@ -4,7 +4,7 @@ import { FormItem } from './FormItem'
 
 export interface ContextValue {
   value: Value
-  onChange: (v: any, field: string) => void
+  onChange: (v: any) => void
   register: (name: string, formItem: FormItem) => () => void
   resetError: () => void
 }

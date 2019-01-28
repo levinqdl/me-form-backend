@@ -1,6 +1,7 @@
 import React, { ComponentType } from 'react'
 import { Consumer } from './Context'
 import { Omit, GetProps } from './typeUtils'
+import changeHandler from './changeHandler'
 
 interface OwnProps {
   name: string
@@ -45,7 +46,7 @@ const withForm: (options: Options) => InferableComponentEnhancer = ({
       <Comp
         {...rest}
         value={value[name]}
-        onChange={(v: any) => onChange(parser(v), name)}
+        onChange={changeHandler(value, name, onChange)}
       />
     )}
   </Consumer>

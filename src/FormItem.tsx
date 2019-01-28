@@ -1,6 +1,7 @@
-import React, { ReactElement, ComponentType } from 'react'
+import React, { ReactElement, ComponentType, ReactNode } from 'react'
 import { Provider, Consumer, ContextValue } from './Context'
-import { ElementTypeOf, Omit } from './typeUtils'
+import { ElementTypeOf, Omit, XOR } from './typeUtils'
+import changeHandler from './changeHandler'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
 
@@ -12,13 +13,19 @@ export interface ErrorMessages {
   [key: string]: string
 }
 
-interface FormItemProps {
+type FormItemProps = {
   name: string
   required?: boolean
   minLength?: number
   validator?: (value: string) => ValidatorResult
   errorMessages?: ErrorMessages
-  children: any
+  children:
+    | ((props: {
+        value: any
+        onChange: (value: any) => void
+        error: string
+      }) => ReactNode)
+    | ReactNode
 }
 
 interface ChildParams {
@@ -33,7 +40,7 @@ export type FormProps<
   C extends ComponentType<{ value: any; onChange: any }>
 > = Omit<Props<ElementTypeOf<C>>, 'value' | 'onChange' | 'children'>
 
-type P = ContextValue & FormItemProps & { children: (x: any) => any }
+type P = ContextValue & FormItemProps & { value: any; children: any }
 
 interface State {
   error: ValidatorResult
@@ -51,7 +58,7 @@ export class FormItem extends React.Component<P, State> {
     const validator = this.getValidator()
     let error = null
     if (validator) {
-      error = validator(value[name])
+      error = validator(value)
     }
     this.setState({ error })
     return error
@@ -71,8 +78,8 @@ export class FormItem extends React.Component<P, State> {
     this.props.register(this.props.name, this)
   }
   componentDidUpdate(prevProps: P) {
-    const { value, name } = this.props
-    if (value[name] !== prevProps.value[name]) {
+    const { value } = this.props
+    if (value !== prevProps.value) {
       this.validate()
     }
   }
@@ -87,35 +94,51 @@ export class FormItem extends React.Component<P, State> {
   }
   register = () => () => {}
   resetError = () => {}
+  renderChildren = () => {
+    const { children, value, onChange } = this.props
+    return typeof children === 'function'
+      ? children({
+          value,
+          onChange,
+          error: this.getError(),
+        })
+      : children
+  }
   render() {
-    const { children, value, onChange, name, resetError } = this.props
+    const { value, onChange, resetError } = this.props
     return (
       <Provider
         value={{
-          value: value[name],
-          onChange: (val: any, fieldName: string) => {
-            const target = value[name]
-            target[fieldName] = val
-            onChange(target, name)
-          },
+          value,
+          onChange,
           register: this.register,
           resetError: this.resetError,
         }}
       >
-        <span onFocus={resetError}>
-          {children({
-            value: value[name],
-            onChange: (value: any) => onChange(value, name),
-            error: this.getError(),
-          })}
-        </span>
+        <span onFocus={resetError}>{this.renderChildren()}</span>
       </Provider>
     )
   }
 }
 
-const ConnectedFormItem: ComponentType<FormItemProps> = props => (
-  <Consumer>{context => <FormItem {...context} {...props} />}</Consumer>
+const ConnectedFormItem: ComponentType<FormItemProps> = ({
+  name,
+  ...props
+}) => (
+  <Consumer>
+    {({ value, onChange, ...context }) => {
+      const target = name ? value[name] : value
+      return (
+        <FormItem
+          value={target}
+          onChange={changeHandler(value, name, onChange)}
+          name={name}
+          {...context}
+          {...props}
+        />
+      )
+    }}
+  </Consumer>
 )
 
 export default ConnectedFormItem

@@ -1,8 +1,9 @@
 import React, { ReactNode, ReactElement } from 'react'
 import { Provider, ContextValue } from './Context'
 import { FormItem, ValidatorResult, ErrorMessages } from './FormItem'
+import { XOR } from './typeUtils'
 
-export interface Value {
+export type Value = {
   [key: string]: any
 }
 
@@ -14,11 +15,6 @@ interface ControlledModeProps {
   value: Value
   onChange: (value: Value) => void
 }
-
-type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
-type XOR<T, U> = (T | U) extends object
-  ? (Without<T, U> & U) | (Without<U, T> & T)
-  : T | U
 
 type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
   children:
@@ -48,17 +44,12 @@ class Form extends React.Component<Props, State> {
       onSubmit(this.state.value)
     }
   }
-  onChange = (v: any, field: string) => {
-    const { value, onChange } = this.props
+  onChange = (value: any) => {
+    const { onChange } = this.props
     if (onChange) {
-      onChange({ ...value, [field]: v })
+      onChange(value)
     } else {
-      this.setState(({ value }) => ({
-        value: {
-          ...value,
-          [field]: v,
-        },
-      }))
+      this.setState({ value })
     }
   }
   validate = () => {

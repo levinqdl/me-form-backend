@@ -24,8 +24,7 @@
     "rollup-plugin-babel": "^4.3.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "ts-jest": "^23.10.5",
-    "typescript": "^3.2.2",
-    "user-event": "^1.4.4"
+    "typescript": "^3.2.2"
   },
   "scripts": {
     "start": "rollup -c rollup.config.js -w",

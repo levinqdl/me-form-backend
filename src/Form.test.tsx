@@ -2,6 +2,7 @@ import React, { ChangeEvent, ComponentType } from 'react'
 import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form, { Value } from './Form'
 import FormItem, { FormProps } from './FormItem'
+import ArrayField from './ArrayField'
 
 afterEach(cleanup)
 
@@ -136,7 +137,7 @@ describe('Form', () => {
       <Form
         initValue={{ f1: '', f2: '' }}
         onSubmit={handleSubmit}
-        validator={({ f1, f2 }: Value) =>
+        validator={({ f1, f2 }: { f1: string; f2: string }) =>
           f1 === f2 ? null : { rule: 'equal' }
         }
         errorMessages={{ equal: 'f1 & f2 should be equal' }}
@@ -227,7 +228,9 @@ describe('multi-layer form', () => {
       <Form initValue={{ a: { b: '' } }} onSubmit={handleSubmit}>
         {({ submit }) => (
           <>
-            <FormItem name="a">{() => <Input name="b" label="b" />}</FormItem>
+            <FormItem name="a">
+              <Input name="b" label="b" />
+            </FormItem>
             <button type="button" onClick={submit}>
               submit
             </button>
@@ -241,5 +244,51 @@ describe('multi-layer form', () => {
     const submit = getByText('submit')
     fireEvent.click(submit)
     expect(handleSubmit).toHaveBeenCalledWith({ a: { b: 'b changed' } })
+  })
+  it('iterate over iterable value', () => {
+    const { getByLabelText, getByText, queryByLabelText } = render(
+      <Form initValue={{ a: ['f1', 'f2'], b: ['f3', 'f4'] }}>
+        {() => (
+          <>
+            <ArrayField name="a">
+              {({ index, remove }) => (
+                <React.Fragment key={index}>
+                  <Input name="" label={`a${index}`} />
+                  <button onClick={remove}>remove a{index}</button>
+                </React.Fragment>
+              )}
+            </ArrayField>
+            <FormItem name="b">
+              <ArrayField>
+                {({ index, remove }) => (
+                  <React.Fragment key={index}>
+                    <Input name="" label={`b${index}`} />
+                    <button onClick={remove}>remove b{index}</button>
+                  </React.Fragment>
+                )}
+              </ArrayField>
+            </FormItem>
+          </>
+        )}
+      </Form>,
+    )
+    const input1 = getByLabelText('a0')
+    const input2 = getByLabelText('a1')
+    const input3 = getByLabelText('b0')
+    const input4 = getByLabelText('b1')
+    expect(input1).toHaveAttribute('value', 'f1')
+    expect(input2).toHaveAttribute('value', 'f2')
+    expect(input3).toHaveAttribute('value', 'f3')
+    expect(input4).toHaveAttribute('value', 'f4')
+    fireEvent.change(input1, { target: { value: 'f1 changed' } })
+    expect(input1).toHaveAttribute('value', 'f1 changed')
+    fireEvent.change(input3, { target: { vlaue: 'f3 changed' } })
+    const remove2 = getByText('remove a1')
+    fireEvent.click(remove2)
+    expect(queryByLabelText('a1')).toBeNull()
+    const remove4 = getByText('remove b1')
+    fireEvent.click(remove4)
+
+    expect(queryByLabelText('b1')).toBeNull()
   })
 })
