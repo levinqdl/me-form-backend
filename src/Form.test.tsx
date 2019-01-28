@@ -37,7 +37,7 @@ const Input = ({
           onChange={({ target: { value } }) => onChange(value)}
           label={label}
         />
-        <span>{error}</span>
+        {error && <span>{error.message}</span>}
       </>
     )}
   </FormItem>

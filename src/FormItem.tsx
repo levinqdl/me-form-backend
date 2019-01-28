@@ -2,11 +2,13 @@ import React, { ReactElement, ComponentType, ReactNode } from 'react'
 import { Provider, Consumer, ContextValue } from './Context'
 import { ElementTypeOf, Omit, XOR } from './typeUtils'
 import changeHandler from './changeHandler'
+import { error } from 'util'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
 
 export interface ValidatorResult {
   rule: string
+  message?: string
 }
 
 export interface ErrorMessages {
@@ -23,7 +25,7 @@ type FormItemProps = {
     | ((props: {
         value: any
         onChange: (value: any) => void
-        error: string
+        error: ValidatorResult
       }) => ReactNode)
     | ReactNode
 }
@@ -86,11 +88,19 @@ export class FormItem extends React.Component<P, State> {
   getError() {
     const { errorMessages } = this.props
     const { error } = this.state
-    return error
-      ? errorMessages
-        ? errorMessages[error.rule] || error.rule
-        : error.rule
-      : ''
+    if (error) {
+      const message = error
+        ? errorMessages
+          ? errorMessages[error.rule] || error.rule
+          : error.rule
+        : ''
+      return {
+        ...error,
+        message,
+      }
+    } else {
+      return null
+    }
   }
   register = () => () => {}
   resetError = () => {}
