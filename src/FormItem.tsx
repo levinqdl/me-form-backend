@@ -2,6 +2,7 @@ import React, { ReactElement, ComponentType, ReactNode } from 'react'
 import { Provider, Consumer, ContextValue } from './Context'
 import { ElementTypeOf, Omit } from './typeUtils'
 import changeHandler from './changeHandler'
+import { get } from 'immutable'
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
 import { isImmutable, is } from 'immutable'
@@ -17,6 +18,7 @@ export interface ErrorMessages {
 
 type FormItemProps = {
   name?: string
+  defaultValue?: any
   required?: boolean
   minLength?: number
   validator?: (value: any) => ValidatorResult
@@ -55,15 +57,21 @@ export class FormItem extends React.Component<P, State> {
       error: null,
     }
   }
-  validate = () => {
-    const { value, name } = this.props
+  validate = (isSubmit?: boolean) => {
+    let childrenError: ValidatorResult = null
+    if (isSubmit) {
+      for (const item of this.items.values()) {
+        childrenError = item.validate(isSubmit)
+      }
+    }
+    const { value } = this.props
     const validator = this.getValidator()
     let error = null
     if (validator) {
       error = validator(isImmutable(value) ? value.toJS() : value)
     }
     this.setState({ error })
-    return error
+    return error || childrenError
   }
   getValidator() {
     const { validator, required, minLength } = this.props
@@ -102,8 +110,16 @@ export class FormItem extends React.Component<P, State> {
       return null
     }
   }
-  register = () => () => {}
-  resetError = () => {}
+  items: Map<string, FormItem> = new Map()
+  register = (name: string, item: FormItem) => {
+    this.items.set(name, item)
+    return () => {
+      this.items.delete(name)
+    }
+  }
+  resetError = () => {
+    this.setState({ error: null })
+  }
   renderChildren = () => {
     const { children, value, onChange } = this.props
     return typeof children === 'function'
@@ -133,11 +149,12 @@ export class FormItem extends React.Component<P, State> {
 
 const ConnectedFormItem: ComponentType<FormItemProps> = ({
   name,
+  defaultValue,
   ...props
 }) => (
   <Consumer>
     {({ value, onChange, ...context }) => {
-      const target = name ? value.get(name) : value
+      const target = name ? get(value, name, defaultValue) : value
       return (
         <FormItem
           value={target}

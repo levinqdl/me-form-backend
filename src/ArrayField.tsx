@@ -16,7 +16,7 @@ interface Props {
 
 const ArrayField = ({ name, children }: Props) => (
   <Consumer>
-    {({ value, onChange }) => {
+    {({ value, onChange, register, resetError }) => {
       const target = name !== undefined && name !== '' ? value.get(name) : value
       const handleChange = changeHandler(value, name, onChange)
       return target.map((val: any, index: number) => (
@@ -25,8 +25,8 @@ const ArrayField = ({ name, children }: Props) => (
           value={{
             value: val,
             onChange: changeHandler(target, index, handleChange),
-            register: () => () => {},
-            resetError: () => {},
+            register,
+            resetError,
           }}
         >
           {children({

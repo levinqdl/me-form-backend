@@ -1,21 +1,11 @@
 import React, { ChangeEvent, ComponentType } from 'react'
 import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form, { Value } from './Form'
-import FormItem, { FormProps } from './FormItem'
+import FormItem from './FormItem'
 import ArrayField from './ArrayField'
+import Input from './Input'
 
 afterEach(cleanup)
-
-const NativeInput: ComponentType<{
-  label: string
-  value: string
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
-}> = ({ label, ...props }) => (
-  <label>
-    {label}
-    <input {...props} />
-  </label>
-)
 
 // const FormItem = withForm({
 //   parser: ({ target: { value } }: ChangeEvent<HTMLInputElement>) => value,
@@ -23,25 +13,6 @@ const NativeInput: ComponentType<{
 //     required: label => `${label} is required`
 //   }
 // })
-
-const Input = ({
-  label,
-  name,
-  ...formProps
-}: FormProps<typeof NativeInput>) => (
-  <FormItem {...formProps} name={name}>
-    {({ value, onChange, error }: any) => (
-      <>
-        <NativeInput
-          value={value || ''}
-          onChange={({ target: { value } }) => onChange(value)}
-          label={label}
-        />
-        {error && <span>{error.message}</span>}
-      </>
-    )}
-  </FormItem>
-)
 
 const errorMessages = { required: 'f1 is required' }
 
@@ -312,8 +283,18 @@ describe('multi-layer form', () => {
             >
               {({ error }) => (
                 <>
-                  <Input name="b" label="b" />
-                  <Input name="c" label="c" />
+                  <Input
+                    name="b"
+                    label="b"
+                    required
+                    errorMessages={{ required: 'b required' }}
+                  />
+                  <Input
+                    name="c"
+                    label="c"
+                    required
+                    errorMessages={{ required: 'c required' }}
+                  />
                   {error && <span>{error.message}</span>}
                 </>
               )}
@@ -325,6 +306,10 @@ describe('multi-layer form', () => {
         )}
       </Form>,
     )
+    const submit = getByText('submit')
+    fireEvent.click(submit)
+    getByText('b required')
+    getByText('c required')
     const c = getByLabelText('c')
     fireEvent.change(c, { target: { value: 'x' } })
     getByText('b and c should be equal')
