@@ -54,9 +54,9 @@ class Form extends React.Component<Props, State> {
     }
   }
   validate = () => {
-    let error
+    let error = null
     for (const item of this.items.values()) {
-      error = item.validate(true)
+      error = item.validate(true) || error
     }
     const { validator } = this.props
     if (!error && validator) {

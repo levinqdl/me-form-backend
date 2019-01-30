@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ComponentType } from 'react'
+import React, { ChangeEvent, ComponentType, RefObject } from 'react'
 import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form, { Value } from './Form'
 import FormItem from './FormItem'
@@ -313,5 +313,32 @@ describe('multi-layer form', () => {
     const c = getByLabelText('c')
     fireEvent.change(c, { target: { value: 'x' } })
     getByText('b and c should be equal')
+  })
+})
+
+describe('instance validator method', () => {
+  it('Form', () => {
+    const ref: RefObject<Form> = React.createRef()
+    const { getByLabelText } = render(
+      <Form ref={ref} initValue={{ a: '', b: 'b' }}>
+        <Input name="a" label="a" required />
+        <Input name="b" label="b" required />
+      </Form>,
+    )
+    const error = ref.current.validate()
+    expect(error).toMatchObject({ rule: 'required' })
+  })
+  test('FormItem', () => {
+    const ref: RefObject<Form> = React.createRef()
+    const { getByLabelText } = render(
+      <Form ref={ref} initValue={{ a: { b: '', c: 'c' } }}>
+        <FormItem name="a">
+          <Input name="b" label="b" required />
+          <Input name="c" label="c" required />
+        </FormItem>
+      </Form>,
+    )
+    const error = ref.current.validate()
+    expect(error).toMatchObject({ rule: 'required' })
   })
 })

@@ -61,7 +61,7 @@ export class FormItem extends React.Component<P, State> {
     let childrenError: ValidatorResult = null
     if (isSubmit) {
       for (const item of this.items.values()) {
-        childrenError = item.validate(isSubmit)
+        childrenError = item.validate(isSubmit) || childrenError
       }
     }
     const { value } = this.props
