@@ -84,8 +84,12 @@ export class FormItem extends React.Component<P, State> {
     }
     return validator
   }
+  unregister: () => void
   componentDidMount() {
-    this.props.register(this.props.name, this)
+    this.unregister = this.props.register(this.props.name, this)
+  }
+  componentWillUnmount() {
+    this.unregister()
   }
   componentDidUpdate(prevProps: P) {
     const { value } = this.props
