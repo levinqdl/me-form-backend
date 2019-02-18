@@ -1,5 +1,5 @@
 import React from 'react'
-import Form from './Form'
+import Form from '../Form'
 import FormItem from './FormItem'
 import Input from './Input'
 import { render } from 'react-testing-library'

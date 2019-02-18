@@ -1,7 +1,9 @@
 import React, { ComponentType } from 'react'
-import { Consumer } from './Context'
-import { Omit, GetProps } from './typeUtils'
+import Context from './Context'
+import { Omit, GetProps } from './types/typeUtils'
 import changeHandler from './changeHandler'
+
+const { Consumer } = Context
 
 interface OwnProps {
   name: string

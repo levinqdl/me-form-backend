@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react'
-import { Provider, Consumer } from './Context'
-import changeHandler from './changeHandler'
+import Context from '../Context'
+import changeHandler from '../changeHandler'
 import { isImmutable } from 'immutable'
+
+const { Provider, Consumer } = Context
 
 interface ChildParam {
   index: number

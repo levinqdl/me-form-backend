@@ -1,19 +1,19 @@
 import { createContext } from 'react'
 import { Value } from './Form'
-import { FormItem } from './FormItem'
+import { Validatable } from './types'
 
 export interface ContextValue {
   value: Value
   onChange: (v: any) => void
-  register: (name: string, formItem: FormItem) => () => void
+  register: (name: string, formItem: Validatable) => () => void
   resetError: () => void
 }
 
-const { Provider, Consumer } = createContext<ContextValue>({
+const Context = createContext<ContextValue>({
   value: {},
   onChange: () => {},
   register: (item, name) => () => {},
   resetError: () => {},
 })
 
-export { Provider, Consumer }
+export default Context
