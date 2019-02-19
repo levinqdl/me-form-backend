@@ -3,6 +3,7 @@ import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form from './Form'
 import FormItem from './renderprops/FormItem'
 import ArrayField from './renderprops/ArrayField'
+import { act } from 'react-dom/test-utils'
 
 afterEach(cleanup)
 
@@ -323,26 +324,34 @@ describe.each([
     it('Form', () => {
       const ref: RefObject<Form> = React.createRef()
       const { getByLabelText } = render(
-        <Form ref={ref} initValue={{ a: '', b: 'b' }}>
-          <Input name="a" label="a" required />
-          <Input name="b" label="b" required />
-        </Form>,
+        <div>
+          <Form ref={ref} initValue={{ a: '', b: 'b' }}>
+            <Input name="a" label="a" required />
+            <Input name="b" label="b" required />
+          </Form>
+        </div>,
       )
-      const error = ref.current.validate()
-      expect(error).toMatchObject({ rule: 'required' })
+      act(() => {
+        const error = ref.current.validate()
+        expect(error).toMatchObject({ rule: 'required' })
+      })
     })
     test('FormItem', () => {
       const ref: RefObject<Form> = React.createRef()
       const { getByLabelText } = render(
-        <Form ref={ref} initValue={{ a: { b: '', c: 'c' } }}>
-          <FormItem name="a">
-            <Input name="b" label="b" required />
-            <Input name="c" label="c" required />
-          </FormItem>
-        </Form>,
+        <div>
+          <Form ref={ref} initValue={{ a: { b: '', c: 'c' } }}>
+            <FormItem name="a">
+              <Input name="b" label="b" required />
+              <Input name="c" label="c" required />
+            </FormItem>
+          </Form>
+        </div>,
       )
-      const error = ref.current.validate()
-      expect(error).toMatchObject({ rule: 'required' })
+      act(() => {
+        const error = ref.current.validate()
+        expect(error).toMatchObject({ rule: 'required' })
+      })
     })
   })
 })
