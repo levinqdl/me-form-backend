@@ -1,8 +1,9 @@
-import React, { ReactNode, ReactElement } from 'react'
-import { Provider, ContextValue } from './Context'
-import { FormItem, ValidatorResult, ErrorMessages } from './FormItem'
-import { XOR } from './typeUtils'
+import React, { ReactElement } from 'react'
+import Context, { ContextValue } from './Context'
+import { ValidatorResult, ErrorMessages } from './types'
+import { XOR } from './types/typeUtils'
 import { fromJS } from 'immutable'
+import { Validatable } from './types'
 
 export type Value = {
   [key: string]: any
@@ -65,8 +66,8 @@ class Form extends React.Component<Props, State> {
     }
     return error
   }
-  items: Map<string, FormItem> = new Map()
-  register = (name: string, item: FormItem) => {
+  items: Map<string, Validatable> = new Map()
+  register = (name: string, item: Validatable) => {
     this.items.set(name, item)
     return () => {
       this.items.delete(name)
@@ -107,13 +108,13 @@ class Form extends React.Component<Props, State> {
     const { children } = this.props
     const { error, ...contextValue } = this.state
     return (
-      <Provider value={contextValue}>
+      <Context.Provider value={contextValue}>
         <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
           {typeof children === 'function'
             ? children({ submit: this.submit, error: this.getError() })
             : children}
         </form>
-      </Provider>
+      </Context.Provider>
     )
   }
 }

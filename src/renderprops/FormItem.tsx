@@ -1,48 +1,10 @@
-import React, { ReactElement, ComponentType, ReactNode } from 'react'
-import { Provider, Consumer, ContextValue } from './Context'
-import { ElementTypeOf, Omit } from './typeUtils'
-import changeHandler from './changeHandler'
+import React, { ComponentType } from 'react'
+import Context, { ContextValue } from '../Context'
+import changeHandler from '../changeHandler'
 import { get } from 'immutable'
-
-type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
+import { FormItemProps } from '../types'
+import { ValidatorResult } from '../types'
 import { isImmutable, is } from 'immutable'
-
-export interface ValidatorResult {
-  rule: string
-  message?: string
-}
-
-export interface ErrorMessages {
-  [key: string]: string
-}
-
-type FormItemProps = {
-  name?: string
-  defaultValue?: any
-  required?: boolean
-  minLength?: number
-  validator?: (value: any) => ValidatorResult
-  errorMessages?: ErrorMessages
-  children:
-    | ((props: {
-        value: any
-        onChange: (value: any) => void
-        error: ValidatorResult
-      }) => ReactNode)
-    | ReactNode
-}
-
-interface ChildParams {
-  value: any
-}
-
-type Props<TElement> = FormItemProps &
-  GetPropsFromReactElement<TElement> & {
-    children: ({ value }: ChildParams) => TElement
-  }
-export type FormProps<
-  C extends ComponentType<{ value: any; onChange: any }>
-> = Omit<Props<ElementTypeOf<C>>, 'value' | 'onChange' | 'children'>
 
 type P = ContextValue & FormItemProps & { value: any; children: any }
 
@@ -50,7 +12,7 @@ interface State {
   error: ValidatorResult
 }
 
-export class FormItem extends React.Component<P, State> {
+class FormItem extends React.Component<P, State> {
   constructor(props: P) {
     super(props)
     this.state = {
@@ -137,7 +99,7 @@ export class FormItem extends React.Component<P, State> {
   render() {
     const { value, onChange, resetError } = this.props
     return (
-      <Provider
+      <Context.Provider
         value={{
           value,
           onChange,
@@ -146,7 +108,7 @@ export class FormItem extends React.Component<P, State> {
         }}
       >
         <span onFocus={resetError}>{this.renderChildren()}</span>
-      </Provider>
+      </Context.Provider>
     )
   }
 }
@@ -156,7 +118,7 @@ const ConnectedFormItem: ComponentType<FormItemProps> = ({
   defaultValue,
   ...props
 }) => (
-  <Consumer>
+  <Context.Consumer>
     {({ value, onChange, ...context }) => {
       const target = name ? get(value, name, defaultValue) : value
       return (
@@ -169,7 +131,7 @@ const ConnectedFormItem: ComponentType<FormItemProps> = ({
         />
       )
     }}
-  </Consumer>
+  </Context.Consumer>
 )
 
 export default ConnectedFormItem

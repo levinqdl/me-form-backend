@@ -1,16 +1,7 @@
 import React, { ChangeEvent, ComponentType } from 'react'
-import FormItem, { FormProps } from './FormItem'
-
-const NativeInput: ComponentType<{
-  label: string
-  value: string
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
-}> = ({ label, ...props }) => (
-  <label>
-    {label}
-    <input {...props} />
-  </label>
-)
+import FormItem from './FormItem'
+import { FormProps } from '../types'
+import NativeInput from '../NativeInput'
 
 const Input = ({
   label,
