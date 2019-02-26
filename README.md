@@ -37,15 +37,16 @@ Form is the root of your form context, it provides form data to FormItem, useFor
 
 ### Props:
 
-| Prop      | Description                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------- |
-| children  | React elements rendered in Form<br/> or render prop: ({submit, error}) => {}                  |
-| validator | a callback called before onSubmit, return null for no error or an error descriptor            |
-| onSubmit  | callback called when form submit and all validator pass, receive the form data as argument    |
-| value     | pass form data from parent component, Form with value and changed props is in controlled mode |
-| onChange  | callback used in combination with "value" and is called when form data changes                |
-| initValue | initial value for uncontrolled mode                                                           |
-| formTag   | bool type, whether render an html form tag, default false |
+| Prop          | Description                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| children      | React elements rendered in Form<br/> or render prop: ({submit, error}) => {}                  |
+| validator     | a callback called before onSubmit, return null for no error or an error descriptor            |
+| onSubmit      | callback called when form submit and all validator pass, receive the form data as argument    |
+| value         | pass form data from parent component, Form with value and changed props is in controlled mode |
+| onChange      | callback used in combination with "value" and is called when form data changes                |
+| initValue     | initial value for uncontrolled mode                                                           |
+| formTag       | bool type, whether render an html form tag, default false                                     |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages         |
 
 ### Controlled vs Uncontrolled
 
@@ -69,7 +70,7 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 ### Input Options
 
-Usualy we just pass all props to useFormItem hook as input is just fine.
+Usualy we just pass all props to useFormItem hook as input is just fine, all used props listed below:
 
 | property      | description                                                                            |
 | ------------- | -------------------------------------------------------------------------------------- |
@@ -79,6 +80,7 @@ Usualy we just pass all props to useFormItem hook as input is just fine.
 | errorMessages | an object, which keys are validator rules and values are corresponding error messages  |
 | requied       | bool, shorthand for required validator                                                 |
 | minLength     | number, shorthand for min length validator                                             |
+| label | ReactNode, it will be passed to dynamic error message function |
 
 ## FormItem & ArrayField
 
@@ -121,15 +123,22 @@ render as
 
 Form, FormItem and useFormItem all receive a validator for form validation.
 
-Validator should receive form data or the field value it has been defined, returns null if no error or error descriptor if any error exists
+Validator should receive form data or the field value it has been defined, returns null if no error or error descriptor if any error exists.
+
+### ErrorDescriptor
+
+- *rule* defines the type of the error, it's used to find error message or to decide whether the error is ralated a field.
+- *message* can be a plain string, if not provided, error message will be computed from errorMessages.
+- *labels* is an array of field labels passed to message format funcion above metioned, if not provided, field label prop will be used.
 
 ```typescript
 interface ErrorDescriptor {
   rule: string
   message?: string
+  labels?: ReactNode[] // string or react element
 }
 
-;<Form
+<Form
   initValue={{ a: 'a', b: 'b' }}
   validator={({ a, b }) =>
     a !== b ? { rule: 'same value', message: 'a should be same as b' } : null
@@ -140,7 +149,17 @@ interface ErrorDescriptor {
 </Form>
 ```
 
-Form validation is different from fields validation.
+### ErrorMessages
+
+ErrorMessages is an object, which keys are validator rules and values are corresponding error messages.
+
+Value can be a plain string or a function which receive field labels and return a string.
+
+ErrorMessages can be config at multiple level: Form, FormItem or Control, it is merged from top level to deepest level, and later one override message of the smae rule.
+
+### Trigger timing
+
+Form validation is different from fields validation at trigger timing.
 
 Form validation is triggered when form is to be submitted, and it triggers all fields' validators first, and at last is the validator defined at Form.
 

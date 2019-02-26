@@ -5,6 +5,7 @@ import { get } from 'immutable'
 import { FormItemProps } from '../types'
 import { ValidatorResult } from '../types'
 import { isImmutable, is } from 'immutable'
+import parseErrorMessage from '../parseErrorMessage'
 
 type P = ContextValue & FormItemProps & { value: any; children: any }
 
@@ -36,13 +37,16 @@ class FormItem extends React.Component<P, State> {
     return error || childrenError
   }
   getValidator() {
-    const { validator, required, minLength } = this.props
+    const { validator, required, minLength, label } = this.props
     if (required) {
-      return (value: string) => (value ? null : { rule: 'required' })
+      return (value: string) =>
+        value ? null : { rule: 'required', labels: [label] }
     }
     if (minLength) {
       return (value: string) =>
-        value.length >= minLength ? null : { rule: 'minLength' }
+        value.length >= minLength
+          ? null
+          : { rule: 'minLength', labels: [label] }
     }
     return validator
   }
@@ -60,14 +64,10 @@ class FormItem extends React.Component<P, State> {
     }
   }
   getError() {
-    const { errorMessages } = this.props
+    const { errorMessages, label } = this.props
     const { error } = this.state
     if (error) {
-      const message = error
-        ? errorMessages
-          ? errorMessages[error.rule] || error.rule
-          : error.rule
-        : ''
+      const message = parseErrorMessage(error, errorMessages)
       return {
         message,
         ...error,
@@ -97,7 +97,7 @@ class FormItem extends React.Component<P, State> {
       : children
   }
   render() {
-    const { value, onChange, resetError } = this.props
+    const { value, onChange, resetError, errorMessages } = this.props
     return (
       <Context.Provider
         value={{
@@ -105,6 +105,7 @@ class FormItem extends React.Component<P, State> {
           onChange,
           register: this.register,
           resetError: this.resetError,
+          errorMessages,
         }}
       >
         <span onFocus={resetError}>{this.renderChildren()}</span>
@@ -116,16 +117,18 @@ class FormItem extends React.Component<P, State> {
 const ConnectedFormItem: ComponentType<FormItemProps> = ({
   name,
   defaultValue,
+  errorMessages,
   ...props
 }) => (
   <Context.Consumer>
-    {({ value, onChange, ...context }) => {
+    {({ value, onChange, errorMessages: ctxErrorMessages, ...context }) => {
       const target = name ? get(value, name, defaultValue) : value
       return (
         <FormItem
           value={target}
           onChange={changeHandler(value, name, onChange)}
           name={name}
+          errorMessages={{ ...ctxErrorMessages, ...errorMessages }}
           {...context}
           {...props}
         />

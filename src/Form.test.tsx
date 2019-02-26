@@ -16,7 +16,7 @@ afterEach(cleanup)
 const errorMessages = { required: 'f1 is required' }
 
 describe.each([
-  ['render props', require('./renderprops/Input').default],
+  // ['render props', require('./renderprops/Input').default],
   ['hooks', require('./hooks/Input').default],
 ])('Form', (name, Input) => {
   describe(`Form with ${name}`, () => {
@@ -201,6 +201,41 @@ describe.each([
         </Form>,
       )
       expect(input).toHaveAttribute('value', 'f1 changed')
+    })
+    it('errorMessages at Form', () => {
+      const { getByText } = render(
+        <Form
+          initValue={{ g1: { a: 'a', b: 'b', c: '' }, g2: { c: '', d: '' } }}
+          errorMessages={{
+            equal: ([a, b]) => `${a} and ${b} should be same`,
+            required: ([label]) => `${label} is required`,
+          }}
+        >
+          {({ submit }) => (
+            <>
+              <FormItem
+                name="g1"
+                validator={({ a, b }) =>
+                  a === b ? null : { rule: 'equal', labels: ['la', 'lb'] }
+                }
+              >
+                {({ error }) => (
+                  <>
+                    <Input name="c" label="lc" required />
+                    <Input name="a" label="la" required />
+                    <Input name="b" label="lb" required />
+                    {error && <span>{error.message}</span>}
+                  </>
+                )}
+              </FormItem>
+              <button onClick={submit}>submit</button>
+            </>
+          )}
+        </Form>,
+      )
+      fireEvent.click(getByText('submit'))
+      getByText('lc is required')
+      getByText('la and lb should be same')
     })
   })
 

@@ -9,17 +9,21 @@ interface ChildParams {
   value: any
 }
 
+type Label = ReactNode
+
 export interface ValidatorResult {
   rule: string
   message?: string
+  labels?: Label[]
 }
 
 export interface ErrorMessages {
-  [key: string]: string
+  [key: string]: string | ((labels: Label[]) => string)
 }
 
 export type FormItemProps = {
   name?: string
+  label?: string
   defaultValue?: any
   required?: boolean
   minLength?: number

@@ -3,8 +3,8 @@ import { FormProps } from '../types'
 import NativeInput from '../NativeInput'
 import useFormItem from './useFormItem'
 
-const Input = ({ label, ...formProps }: FormProps<typeof NativeInput>) => {
-  const { value, onChange, error, resetError } = useFormItem(formProps)
+const Input = (props: FormProps<typeof NativeInput>) => {
+  const { value, onChange, error, resetError, label } = useFormItem(props)
   return (
     <span onFocus={resetError}>
       <NativeInput

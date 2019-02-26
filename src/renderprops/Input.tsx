@@ -8,7 +8,7 @@ const Input = ({
   name,
   ...formProps
 }: FormProps<typeof NativeInput>) => (
-  <FormItem {...formProps} name={name}>
+  <FormItem {...formProps} name={name} label={label}>
     {({ value, onChange, error }: any) => (
       <>
         <NativeInput

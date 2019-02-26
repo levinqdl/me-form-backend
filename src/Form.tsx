@@ -4,6 +4,7 @@ import { ValidatorResult, ErrorMessages } from './types'
 import { XOR } from './types/typeUtils'
 import { fromJS } from 'immutable'
 import { Validatable } from './types'
+import parseErrorMessage from './parseErrorMessage'
 
 export type Value = {
   [key: string]: any
@@ -85,6 +86,7 @@ class Form extends React.Component<Props, State> {
     register: this.register,
     resetError: this.resetError,
     error: null,
+    errorMessages: this.props.errorMessages,
   }
   getError() {
     const { errorMessages } = this.props
@@ -106,11 +108,14 @@ class Form extends React.Component<Props, State> {
     }
   }
   render() {
-    const { children, formTag } = this.props
+    const { children, formTag, errorMessages } = this.props
     const { error, ...contextValue } = this.state
     const content =
       typeof children === 'function'
-        ? children({ submit: this.submit, error: this.getError() })
+        ? children({
+            submit: this.submit,
+            error: parseErrorMessage(error, errorMessages),
+          })
         : children
     return (
       <Context.Provider value={contextValue}>

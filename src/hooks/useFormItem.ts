@@ -3,6 +3,7 @@ import Context from '../Context'
 import { get, is } from 'immutable'
 import changeHandler from '../changeHandler'
 import { ValidatorResult, ErrorMessages } from '../types'
+import parseErrorMessage from '../parseErrorMessage'
 
 interface FormProps<V = any> {
   name?: string
@@ -11,6 +12,7 @@ interface FormProps<V = any> {
   errorMessages?: ErrorMessages
   required?: boolean
   minLength?: number
+  label?: string
 }
 
 // TODO: define return type
@@ -21,8 +23,15 @@ const useFormItem: (formProps: FormProps) => any = ({
   errorMessages,
   required,
   minLength,
+  label,
 }) => {
-  const { value, onChange, register, resetError } = useContext(Context)
+  const {
+    value,
+    onChange,
+    register,
+    resetError,
+    errorMessages: ctxErrorMessages,
+  } = useContext(Context)
   const [error, setError] = useState(null)
   const target = name ? get(value, name, defaultValue) : value
 
@@ -32,9 +41,12 @@ const useFormItem: (formProps: FormProps) => any = ({
     if (validator) {
       error = validator(target)
     } else if (required && !target) {
-      error = { rule: 'required' }
+      error = { rule: 'required', labels: [label] }
     } else if (minLength) {
-      error = target.length >= minLength ? null : { rule: 'minLength' }
+      error =
+        target.length >= minLength
+          ? null
+          : { rule: 'minLength', labels: [label] }
     }
     setError(error)
     return error
@@ -58,11 +70,10 @@ const useFormItem: (formProps: FormProps) => any = ({
 
   const parseError = () => {
     if (error) {
-      const message = error
-        ? errorMessages
-          ? errorMessages[error.rule] || error.rule
-          : error.rule
-        : ''
+      const message = parseErrorMessage(error, {
+        ...errorMessages,
+        ...ctxErrorMessages,
+      })
       return {
         message,
         ...error,
@@ -75,6 +86,7 @@ const useFormItem: (formProps: FormProps) => any = ({
     onChange: changeHandler(value, name, onChange),
     error: parseError(),
     resetError,
+    label,
   }
 }
 
