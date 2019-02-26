@@ -45,6 +45,7 @@ Form is the root of your form context, it provides form data to FormItem, useFor
 | value     | pass form data from parent component, Form with value and changed props is in controlled mode |
 | onChange  | callback used in combination with "value" and is called when form data changes                |
 | initValue | initial value for uncontrolled mode                                                           |
+| formTag   | bool type, whether render an html form tag, default false |
 
 ### Controlled vs Uncontrolled
 

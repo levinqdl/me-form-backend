@@ -26,6 +26,7 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
   onSubmit?: (value: Value) => void
   validator?: (value: Value) => ValidatorResult
   errorMessages?: ErrorMessages
+  formTag?: boolean
 }
 
 type State = ContextValue & {
@@ -105,15 +106,21 @@ class Form extends React.Component<Props, State> {
     }
   }
   render() {
-    const { children } = this.props
+    const { children, formTag } = this.props
     const { error, ...contextValue } = this.state
+    const content =
+      typeof children === 'function'
+        ? children({ submit: this.submit, error: this.getError() })
+        : children
     return (
       <Context.Provider value={contextValue}>
-        <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
-          {typeof children === 'function'
-            ? children({ submit: this.submit, error: this.getError() })
-            : children}
-        </form>
+        {formTag ? (
+          <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
+            {content}
+          </form>
+        ) : (
+          content
+        )}
       </Context.Provider>
     )
   }

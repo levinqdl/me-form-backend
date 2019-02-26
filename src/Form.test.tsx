@@ -21,12 +21,21 @@ describe.each([
 ])('Form', (name, Input) => {
   describe(`Form with ${name}`, () => {
     it('renders children', () => {
-      const { getByText } = render(
+      const { container, getByText } = render(
         <Form initValue={{}}>
           <span>form content</span>
         </Form>,
       )
       getByText('form content')
+      expect(container.querySelector('form')).toBeNull()
+    })
+    it('form tag', () => {
+      const { container } = render(
+        <Form initValue={{}} formTag>
+          <span>form content</span>
+        </Form>,
+      )
+      expect(container.querySelector('form')).not.toBeNull()
     })
     it('provide value & onChange for fields', () => {
       const { getByLabelText } = render(
