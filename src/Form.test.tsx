@@ -16,7 +16,7 @@ afterEach(cleanup)
 const errorMessages = { required: 'f1 is required' }
 
 describe.each([
-  // ['render props', require('./renderprops/Input').default],
+  ['render props', require('./renderprops/Input').default],
   ['hooks', require('./hooks/Input').default],
 ])('Form', (name, Input) => {
   describe(`Form with ${name}`, () => {
@@ -236,6 +236,16 @@ describe.each([
       fireEvent.click(getByText('submit'))
       getByText('lc is required')
       getByText('la and lb should be same')
+    })
+    it('interceptor transform changed value', () => {
+      const { getByLabelText } = render(
+        <Form initValue={{ a: '' }}>
+          <Input interceptor={(v: string) => v.trimLeft()} name="a" label="a" />
+        </Form>,
+      )
+      const input = getByLabelText('a')
+      fireEvent.change(input, { target: { value: ' hello world' } })
+      expect(input).toHaveAttribute('value', 'hello world')
     })
   })
 

@@ -118,6 +118,7 @@ const ConnectedFormItem: ComponentType<FormItemProps> = ({
   name,
   defaultValue,
   errorMessages,
+  interceptor,
   ...props
 }) => (
   <Context.Consumer>
@@ -126,7 +127,7 @@ const ConnectedFormItem: ComponentType<FormItemProps> = ({
       return (
         <FormItem
           value={target}
-          onChange={changeHandler(value, name, onChange)}
+          onChange={changeHandler(value, name, onChange, interceptor)}
           name={name}
           errorMessages={{ ...ctxErrorMessages, ...errorMessages }}
           {...context}

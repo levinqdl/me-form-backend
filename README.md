@@ -72,15 +72,16 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 Usualy we just pass all props to useFormItem hook as input is just fine, all used props listed below:
 
-| property      | description                                                                            |
-| ------------- | -------------------------------------------------------------------------------------- |
-| name          | string for field name                                                                  |
-| defaultValue  | used when specified filed is undefined                                                 |
-| validator     | callback whenever field value changes, return null as no error, or an error descriptor |
-| errorMessages | an object, which keys are validator rules and values are corresponding error messages  |
-| requied       | bool, shorthand for required validator                                                 |
-| minLength     | number, shorthand for min length validator                                             |
-| label | ReactNode, it will be passed to dynamic error message function |
+| property      | description                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| name          | string for field name                                                                          |
+| defaultValue  | used when specified filed is undefined                                                         |
+| validator     | callback whenever field value changes, return null as no error, or an error descriptor         |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages          |
+| requied       | bool, shorthand for required validator                                                         |
+| minLength     | number, shorthand for min length validator                                                     |
+| label         | ReactNode, it will be passed to dynamic error message function                                 |
+| interceptor   | a function called when field value changes, receive changed value, can be used like trim input |
 
 ## FormItem & ArrayField
 
@@ -127,9 +128,9 @@ Validator should receive form data or the field value it has been defined, retur
 
 ### ErrorDescriptor
 
-- *rule* defines the type of the error, it's used to find error message or to decide whether the error is ralated a field.
-- *message* can be a plain string, if not provided, error message will be computed from errorMessages.
-- *labels* is an array of field labels passed to message format funcion above metioned, if not provided, field label prop will be used.
+- _rule_ defines the type of the error, it's used to find error message or to decide whether the error is ralated a field.
+- _message_ can be a plain string, if not provided, error message will be computed from errorMessages.
+- _labels_ is an array of field labels passed to message format funcion above metioned, if not provided, field label prop will be used.
 
 ```typescript
 interface ErrorDescriptor {
@@ -138,7 +139,7 @@ interface ErrorDescriptor {
   labels?: ReactNode[] // string or react element
 }
 
-<Form
+;<Form
   initValue={{ a: 'a', b: 'b' }}
   validator={({ a, b }) =>
     a !== b ? { rule: 'same value', message: 'a should be same as b' } : null

@@ -21,18 +21,19 @@ export interface ErrorMessages {
   [key: string]: string | ((labels: Label[]) => string)
 }
 
-export type FormItemProps = {
+export type FormItemProps<V = any> = {
   name?: string
   label?: string
-  defaultValue?: any
+  defaultValue?: V
   required?: boolean
   minLength?: number
   validator?: (value: any) => ValidatorResult
+  interceptor?: (value: V) => V
   errorMessages?: ErrorMessages
   children:
     | ((props: {
-        value: any
-        onChange: (value: any) => void
+        value: V
+        onChange: (value: V) => void
         error: ValidatorResult
       }) => ReactNode)
     | ReactNode

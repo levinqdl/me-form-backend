@@ -13,6 +13,7 @@ interface FormProps<V = any> {
   required?: boolean
   minLength?: number
   label?: string
+  interceptor?: (v: V) => V
 }
 
 // TODO: define return type
@@ -24,6 +25,7 @@ const useFormItem: (formProps: FormProps) => any = ({
   required,
   minLength,
   label,
+  interceptor,
 }) => {
   const {
     value,
@@ -83,7 +85,7 @@ const useFormItem: (formProps: FormProps) => any = ({
   }
   return {
     value: target,
-    onChange: changeHandler(value, name, onChange),
+    onChange: changeHandler(value, name, onChange, interceptor),
     error: parseError(),
     resetError,
     label,
