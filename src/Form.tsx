@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react'
 import Context, { ContextValue } from './Context'
 import { ValidatorResult, ErrorMessages } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS } from 'immutable'
+import { fromJS, isImmutable } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 
@@ -23,7 +23,11 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
   children:
     | ReactElement<any>
     | Array<ReactElement<any>>
-    | ((form: { submit: () => void; error: string }) => ReactElement<any>)
+    | ((form: {
+        submit: () => void
+        error: string
+        data?: Value
+      }) => ReactElement<any>)
   onSubmit?: (value: Value) => void
   validator?: (value: Value) => ValidatorResult
   errorMessages?: ErrorMessages
@@ -110,11 +114,13 @@ class Form extends React.Component<Props, State> {
   render() {
     const { children, formTag, errorMessages } = this.props
     const { error, ...contextValue } = this.state
+    const { value } = contextValue
     const content =
       typeof children === 'function'
         ? children({
             submit: this.submit,
             error: parseErrorMessage(error, errorMessages),
+            data: isImmutable(value) ? value.toJS() : value,
           })
         : children
     return (

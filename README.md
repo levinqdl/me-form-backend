@@ -39,7 +39,7 @@ Form is the root of your form context, it provides form data to FormItem, useFor
 
 | Prop          | Description                                                                                   |
 | ------------- | --------------------------------------------------------------------------------------------- |
-| children      | React elements rendered in Form<br/> or render prop: ({submit, error}) => {}                  |
+| children      | React elements rendered in Form<br/> or render prop: ({submit, value, error}) => {}           |
 | validator     | a callback called before onSubmit, return null for no error or an error descriptor            |
 | onSubmit      | callback called when form submit and all validator pass, receive the form data as argument    |
 | value         | pass form data from parent component, Form with value and changed props is in controlled mode |

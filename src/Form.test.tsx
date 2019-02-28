@@ -114,7 +114,7 @@ describe.each([
       getByText('f1 required')
       expect(queryByText('f2 required')).toBeNull()
     })
-    it('submit and validate', () => {
+    it('renderprop children: submit, data, error', () => {
       const handleSubmit = jest.fn()
       const { getByLabelText, getByText, queryByText } = render(
         <Form
@@ -125,7 +125,7 @@ describe.each([
           }
           errorMessages={{ equal: 'f1 & f2 should be equal' }}
         >
-          {({ submit, error }) => (
+          {({ submit, error, data }) => (
             <>
               <Input
                 label="f1"
@@ -133,12 +133,14 @@ describe.each([
                 required
                 errorMessages={{ required: 'f1 required' }}
               />
+              <span>{data.f1}</span>
               <Input
                 label="f2"
                 name="f2"
                 required
                 errorMessages={{ required: 'f2 required' }}
               />
+              <span>{data.f2}</span>
               <span>{error}</span>
               <button onClick={submit} type="button">
                 submit
@@ -156,6 +158,8 @@ describe.each([
       const input2 = getByLabelText('f2')
       fireEvent.change(input1, { target: { value: 'f1 changed' } })
       fireEvent.change(input2, { target: { value: 'f2 changed' } })
+      getByText('f1 changed')
+      getByText('f2 changed')
       fireEvent.click(submitButton)
       expect(queryByText('f1 required')).toBeNull()
       expect(queryByText('f2 required')).toBeNull()
