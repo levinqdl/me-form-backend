@@ -3,7 +3,7 @@ import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps, ValidatorResult } from '../types'
-import patch from '../patch'
+import { patch, appendScope } from '../utils'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 
@@ -102,6 +102,7 @@ class FormItem extends React.Component<P, State> {
             onChange(interceptor(v), scope)
           },
           error: this.getError(),
+          id: scope.join('.'),
         })
       : children
   }
@@ -130,6 +131,7 @@ type ConnectedFormItemProps<V = any> = FormItemProps<V> & {
         value: V
         onChange: (value: V) => void
         error: ValidatorResult
+        id: string
       }) => ReactNode)
     | ReactNode
 }
@@ -147,8 +149,7 @@ const ConnectedFormItem: ComponentType<ConnectedFormItemProps> = ({
       errorMessages: ctxErrorMessages,
       ...context
     }) => {
-      const computedScope =
-        name !== '' && name !== undefined ? [...scope, name] : scope
+      const computedScope = appendScope(scope, name)
       const target = value.getIn(computedScope)
       return (
         <FormItem

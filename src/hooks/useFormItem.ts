@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
-import patch from '../patch'
+import { patch, appendScope } from '../utils'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = ({
@@ -76,12 +76,14 @@ const useFormItem: (formProps: FormItemProps) => any = ({
     }
     return null
   }
+  const computedScope = appendScope(scope, name)
   return {
     value: target,
-    onChange: (v: any) => onChange(interceptor(v), [...scope, name]),
+    onChange: (v: any) => onChange(interceptor(v), computedScope),
     error: parseError(),
     resetError,
     label,
+    id: computedScope.join('.'),
   }
 }
 

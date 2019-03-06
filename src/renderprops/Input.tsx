@@ -9,9 +9,10 @@ const Input = ({
   ...formProps
 }: FormProps<typeof NativeInput>) => (
   <FormItem {...formProps} name={name} label={label}>
-    {({ value, onChange, error }: any) => (
+    {({ value, onChange, error, id }: any) => (
       <>
         <NativeInput
+          id={id}
           value={value || ''}
           onChange={({ target: { value } }) => {
             onChange(value)

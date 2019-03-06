@@ -287,6 +287,22 @@ describe.each([
       fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
       expect(getByLabelText('b')).toHaveAttribute('value', 'true')
     })
+    test('id', () => {
+      const { getByLabelText, getByText } = render(
+        <Form initValue={{ a: { txt: '' }, b: { txt: '' } }}>
+          <FormItem name="a">
+            <Input name="txt" label="a" />
+          </FormItem>
+          <FormItem name="b">
+            <Input name="txt" label="b" />
+          </FormItem>
+        </Form>,
+      )
+      expect(getByLabelText('a')).toHaveAttribute('id', 'a.txt')
+      expect(getByText('a')).toHaveAttribute('for', 'a.txt')
+      expect(getByLabelText('b')).toHaveAttribute('id', 'b.txt')
+      expect(getByText('b')).toHaveAttribute('for', 'b.txt')
+    })
   })
 
   describe(`instance validator method with ${name}`, () => {

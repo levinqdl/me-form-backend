@@ -1,13 +1,14 @@
 import React, { ComponentType, ChangeEvent } from 'react'
 
 const NativeInput: ComponentType<{
+  id: string
   label: string
   value: string
   onChange: (e: ChangeEvent<HTMLInputElement>) => void
-}> = ({ label, ...props }) => (
-  <label>
+}> = ({ label, id, ...props }) => (
+  <label htmlFor={id}>
     {label}
-    <input {...props} />
+    <input id={id} {...props} />
   </label>
 )
 

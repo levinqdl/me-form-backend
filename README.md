@@ -75,7 +75,7 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 ### Input Options
 
-Usualy we just pass all props to useFormItem hook as input is just fine, all used props listed below:
+Usualy we just pass all props to useFormItem hook as input is just fine, but you may want to control it, all used props listed below:
 
 | property      | description                                                                                    |
 | ------------- | ---------------------------------------------------------------------------------------------- |
@@ -86,6 +86,17 @@ Usualy we just pass all props to useFormItem hook as input is just fine, all use
 | minLength     | number, shorthand for min length validator                                                     |
 | label         | ReactNode, it will be passed to dynamic error message function                                 |
 | interceptor   | a function called when field value changes, receive changed value, can be used like trim input |
+
+### Output Options
+
+| property   | description                                                                                                                                                                            |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| value      | field value                                                                                                                                                                            |
+| onChange   | onChange callback                                                                                                                                                                      |
+| error      | error descriptor of current field, null if no error                                                                                                                                    |
+| resetError | a callback to clear current error                                                                                                                                                      |
+| label      | identical label passed to the hook                                                                                                                                                     |
+| id         | a dot concated string of all ancestors' name and the current field name, you can pass it to <label> as _for_ attribute and a control id attribute to associate a <label> and a control |
 
 ## FormItem & ArrayField
 
