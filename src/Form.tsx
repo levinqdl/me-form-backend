@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react'
 import Context, { ContextValue } from './Context'
-import { ValidatorResult, ErrorMessages } from './types'
+import { ValidatorResult, ErrorMessages, Key } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS, isImmutable } from 'immutable'
+import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 
@@ -32,6 +32,7 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
   validator?: (value: Value) => ValidatorResult
   errorMessages?: ErrorMessages
   formTag?: boolean
+  defaultValue?: any
 }
 
 type State = ContextValue & {
@@ -52,12 +53,13 @@ class Form extends React.Component<Props, State> {
       onSubmit(this.state.value.toJS())
     }
   }
-  onChange = (value: any) => {
+  onChange = (value: any, keyPath: Key[] = []) => {
+    const nextValue = setIn(this.state.value, keyPath, value)
     const { onChange } = this.props
     if (onChange) {
-      onChange(value.toJS())
+      onChange(nextValue.toJS())
     } else {
-      this.setState({ value })
+      this.setState({ value: nextValue })
     }
   }
   validate = () => {
@@ -82,10 +84,14 @@ class Form extends React.Component<Props, State> {
   resetError = () => {
     this.setState({ error: null })
   }
+  getValue = () => {
+    const { value, defaultValue, initValue } = this.props
+    const v = this.isControlled() ? value : initValue
+    return fromJS(defaultValue ? mergeDeep(defaultValue, v) : v)
+  }
   state: State = {
-    value: fromJS(
-      this.isControlled() ? this.props.value : this.props.initValue,
-    ),
+    value: this.getValue(),
+    scope: [],
     onChange: this.onChange,
     register: this.register,
     resetError: this.resetError,
@@ -103,9 +109,10 @@ class Form extends React.Component<Props, State> {
   }
   static getDerivedStateFromProps(props: Props, state: State) {
     if ('value' in props) {
+      const { defaultValue, value } = props
       return {
         ...state,
-        value: fromJS(props.value),
+        value: fromJS(defaultValue ? mergeDeep(defaultValue, value) : value),
       }
     } else {
       return null
@@ -126,9 +133,7 @@ class Form extends React.Component<Props, State> {
     return (
       <Context.Provider value={contextValue}>
         {formTag ? (
-          <form onSubmit={this.submitEventHandler} onKeyPress={() => {}}>
-            {content}
-          </form>
+          <form onSubmit={this.submitEventHandler}>{content}</form>
         ) : (
           content
         )}

@@ -1,10 +1,11 @@
 import { createContext } from 'react'
 import { Value } from './Form'
-import { Validatable, ErrorMessages } from './types'
+import { Validatable, ErrorMessages, Key } from './types'
 
 export interface ContextValue {
   value: Value
-  onChange: (v: any) => void
+  onChange: (v: any, keyPath?: Key[]) => void
+  scope: Key[]
   register: (name: string, formItem: Validatable) => () => void
   resetError: () => void
   errorMessages: ErrorMessages
@@ -12,6 +13,7 @@ export interface ContextValue {
 
 const Context = createContext<ContextValue>({
   value: {},
+  scope: [],
   onChange: () => {},
   register: (item, name) => () => {},
   resetError: () => {},

@@ -3,6 +3,7 @@ import { render, fireEvent, cleanup } from 'react-testing-library'
 import Form from './Form'
 import FormItem from './renderprops/FormItem'
 import { act } from 'react-dom/test-utils'
+import { useState } from 'react'
 
 afterEach(cleanup)
 
@@ -251,6 +252,41 @@ describe.each([
       fireEvent.change(input, { target: { value: ' hello world' } })
       expect(input).toHaveAttribute('value', 'hello world')
     })
+    test('update associated fields', () => {
+      const Container = () => {
+        return (
+          <Form initValue={{ a: '', b: '', c: 'c' }}>
+            {({ data }) => (
+              <>
+                <Input
+                  name="a"
+                  label="a"
+                  didUpdate={(
+                    changedValue: string,
+                    patch: (v: any, removePath?: string) => void,
+                  ) => {
+                    if (changedValue === '0') {
+                      patch({ b: 'false' }, 'c')
+                    } else {
+                      patch({ b: 'true' })
+                    }
+                  }}
+                />
+                <Input name="b" label="b" />
+                <span>c is {data.c || 'removed'}</span>
+              </>
+            )}
+          </Form>
+        )
+      }
+      const { getByLabelText, getByText } = render(<Container />)
+      getByText('c is c')
+      fireEvent.change(getByLabelText('a'), { target: { value: '0' } })
+      expect(getByLabelText('b')).toHaveAttribute('value', 'false')
+      getByText('c is removed')
+      fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
+      expect(getByLabelText('b')).toHaveAttribute('value', 'true')
+    })
   })
 
   describe(`instance validator method with ${name}`, () => {
@@ -282,5 +318,60 @@ describe.each([
         expect(error).toMatchObject({ rule: 'required' })
       })
     })
+  })
+})
+
+describe('defaultValue', () => {
+  const Input = require('./hooks/Input').default
+  it('merges initValue', () => {
+    const { getByLabelText } = render(
+      <Form
+        initValue={{ a: { c: 'c' } }}
+        defaultValue={{ a: { b: 'default b', c: 'default c' } }}
+      >
+        <FormItem name="a">
+          <Input name="b" label="b" />
+          <Input name="c" label="c" />
+        </FormItem>
+      </Form>,
+    )
+    expect(getByLabelText('b')).toHaveAttribute('value', 'default b')
+    expect(getByLabelText('c')).toHaveAttribute('value', 'c')
+  })
+  it('merges value', () => {
+    const handleChange = jest.fn()
+    const Container = (props: any) => {
+      return (
+        <Form {...props}>
+          <FormItem name="a">
+            <Input name="b" label="b" />
+            <Input name="c" label="c" />
+          </FormItem>
+        </Form>
+      )
+    }
+    const defaultValue = { a: { b: 'default b', c: 'default c' } }
+    const { getByLabelText, rerender } = render(
+      <Container
+        value={{ a: { c: 'c' } }}
+        onChange={handleChange}
+        defaultValue={defaultValue}
+      />,
+    )
+    expect(getByLabelText('b')).toHaveAttribute('value', 'default b')
+    expect(getByLabelText('c')).toHaveAttribute('value', 'c')
+    fireEvent.change(getByLabelText('c'), { target: { value: 'c changed' } })
+    expect(handleChange).toHaveBeenLastCalledWith({
+      a: { b: 'default b', c: 'c changed' },
+    })
+    rerender(
+      <Container
+        value={{ a: { b: 'b changed' } }}
+        onChange={handleChange}
+        defaultValue={defaultValue}
+      />,
+    )
+    expect(getByLabelText('b')).toHaveAttribute('value', 'b changed')
+    expect(getByLabelText('c')).toHaveAttribute('value', 'default c')
   })
 })

@@ -13,7 +13,9 @@ const Input = ({
       <>
         <NativeInput
           value={value || ''}
-          onChange={({ target: { value } }) => onChange(value)}
+          onChange={({ target: { value } }) => {
+            onChange(value)
+          }}
           label={label}
         />
         {error && <span>{error.message}</span>}

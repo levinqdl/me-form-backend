@@ -1,31 +1,20 @@
+import { getIn, is, mergeDeep } from 'immutable'
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
-import { get, is } from 'immutable'
-import changeHandler from '../changeHandler'
-import { ValidatorResult, ErrorMessages } from '../types'
 import parseErrorMessage from '../parseErrorMessage'
-
-interface FormProps<V = any> {
-  name?: string
-  defaultValue?: V
-  validator?: (value: V) => ValidatorResult
-  errorMessages?: ErrorMessages
-  required?: boolean
-  minLength?: number
-  label?: string
-  interceptor?: (v: V) => V
-}
+import { FormItemProps } from '../types'
+import patch from '../patch'
 
 // TODO: define return type
-const useFormItem: (formProps: FormProps) => any = ({
-  defaultValue,
+const useFormItem: (formProps: FormItemProps) => any = ({
   name,
   validator,
   errorMessages,
   required,
   minLength,
   label,
-  interceptor,
+  interceptor = v => v,
+  didUpdate,
 }) => {
   const {
     value,
@@ -33,9 +22,10 @@ const useFormItem: (formProps: FormProps) => any = ({
     register,
     resetError,
     errorMessages: ctxErrorMessages,
+    scope,
   } = useContext(Context)
   const [error, setError] = useState(null)
-  const target = name ? get(value, name, defaultValue) : value
+  const target = name ? getIn(value, [...scope, name], '') : value
 
   const prevTarget = useRef(target)
   const validate = () => {
@@ -58,6 +48,9 @@ const useFormItem: (formProps: FormProps) => any = ({
     if (!is(target, prevTarget.current)) {
       prevTarget.current = target
       validate()
+      if (didUpdate) {
+        didUpdate(target, patch(value, onChange))
+      }
     }
     validateRef.current = validate
   })
@@ -85,7 +78,7 @@ const useFormItem: (formProps: FormProps) => any = ({
   }
   return {
     value: target,
-    onChange: changeHandler(value, name, onChange, interceptor),
+    onChange: (v: any) => onChange(interceptor(v), [...scope, name]),
     error: parseError(),
     resetError,
     label,

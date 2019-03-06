@@ -7,18 +7,7 @@ import ArrayField from './ArrayField'
 
 afterEach(cleanup)
 
-describe('FormItem', () => {
-  it('uses default value when value is undefined', () => {
-    const { getByLabelText } = render(
-      <Form initValue={{}}>
-        <FormItem name="a" defaultValue={{ b: 'default value' }}>
-          <Input name="b" label="b" />
-        </FormItem>
-      </Form>,
-    )
-    expect(getByLabelText('b')).toHaveAttribute('value', 'default value')
-  })
-})
+describe('FormItem', () => {})
 
 describe('multi-layer form', () => {
   it('pass value down to deepest layer', () => {
@@ -62,16 +51,14 @@ describe('multi-layer form', () => {
                 </React.Fragment>
               )}
             </ArrayField>
-            <FormItem name="b">
-              <ArrayField>
-                {({ value, remove }) => (
-                  <FormItem key={value.id}>
-                    <Input name="name" label={value.id} />
-                    <button onClick={remove}>remove {value.id}</button>
-                  </FormItem>
-                )}
-              </ArrayField>
-            </FormItem>
+            <ArrayField name="b">
+              {({ value, remove }) => (
+                <>
+                  <Input name="name" label={value.id} />
+                  <button onClick={remove}>remove {value.id}</button>
+                </>
+              )}
+            </ArrayField>
           </>
         )}
       </Form>,
@@ -86,7 +73,8 @@ describe('multi-layer form', () => {
     expect(input4).toHaveAttribute('value', 'f4')
     fireEvent.change(input1, { target: { value: 'f1 changed' } })
     expect(input1).toHaveAttribute('value', 'f1 changed')
-    fireEvent.change(input3, { target: { vlaue: 'f3 changed' } })
+    fireEvent.change(input3, { target: { value: 'f3 changed' } })
+    expect(input3).toHaveAttribute('value', 'f3 changed')
     const remove2 = getByText('remove a1')
     fireEvent.click(remove2)
     expect(queryByLabelText('a1')).toBeNull()

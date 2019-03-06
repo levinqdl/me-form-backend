@@ -18,17 +18,20 @@ interface Props {
 
 const ArrayField = ({ name, children }: Props) => (
   <Consumer>
-    {({ value, onChange, register, resetError }) => {
-      const target = name !== undefined && name !== '' ? value.get(name) : value
-      const handleChange = changeHandler(value, name, onChange)
+    {({ value, scope, onChange, register, resetError, errorMessages }) => {
+      const computedScope =
+        name !== undefined && name !== '' ? [...scope, name] : scope
+      const target = value.getIn(computedScope)
       return target.map((val: any, index: number) => (
         <Provider
           key={index}
           value={{
-            value: val,
-            onChange: changeHandler(target, index, handleChange),
+            value,
+            scope: [...computedScope, index],
+            onChange,
             register,
             resetError,
+            errorMessages,
           }}
         >
           {children({
@@ -36,7 +39,7 @@ const ArrayField = ({ name, children }: Props) => (
             value: isImmutable(val) ? val.toJS() : val,
             remove: () => {
               const x = target.delete(index)
-              handleChange(x)
+              onChange(x, computedScope)
             },
           })}
         </Provider>

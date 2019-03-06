@@ -1,13 +1,11 @@
-import React, { ComponentType } from 'react'
+import { is, isImmutable, mergeDeep, removeIn } from 'immutable'
+import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
-import changeHandler from '../changeHandler'
-import { get } from 'immutable'
-import { FormItemProps } from '../types'
-import { ValidatorResult } from '../types'
-import { isImmutable, is } from 'immutable'
 import parseErrorMessage from '../parseErrorMessage'
+import { FormItemProps, ValidatorResult } from '../types'
+import patch from '../patch'
 
-type P = ContextValue & FormItemProps & { value: any; children: any }
+type P = ContextValue & FormItemProps & { children: any; target: any }
 
 interface State {
   error: ValidatorResult
@@ -27,11 +25,11 @@ class FormItem extends React.Component<P, State> {
         childrenError = item.validate(isSubmit) || childrenError
       }
     }
-    const { value } = this.props
+    const { target } = this.props
     const validator = this.getValidator()
     let error = null
     if (validator) {
-      error = validator(isImmutable(value) ? value.toJS() : value)
+      error = validator(isImmutable(target) ? target.toJS() : target)
     }
     this.setState({ error })
     return error || childrenError
@@ -58,9 +56,12 @@ class FormItem extends React.Component<P, State> {
     this.unregister()
   }
   componentDidUpdate(prevProps: P) {
-    const { value } = this.props
-    if (!is(value, prevProps.value)) {
+    const { value, target, onChange, didUpdate } = this.props
+    if (!is(target, prevProps.target)) {
       this.validate()
+      if (didUpdate) {
+        didUpdate(target, patch(value, onChange))
+      }
     }
   }
   getError() {
@@ -87,21 +88,30 @@ class FormItem extends React.Component<P, State> {
     this.setState({ error: null })
   }
   renderChildren = () => {
-    const { children, value, onChange } = this.props
+    const {
+      children,
+      target,
+      onChange,
+      interceptor = (v: any) => v,
+      scope,
+    } = this.props
     return typeof children === 'function'
       ? children({
-          value: isImmutable(value) ? value.toJS() : value,
-          onChange,
+          value: isImmutable(target) ? target.toJS() : target,
+          onChange: (v: any) => {
+            onChange(interceptor(v), scope)
+          },
           error: this.getError(),
         })
       : children
   }
   render() {
-    const { value, onChange, resetError, errorMessages } = this.props
+    const { value, onChange, resetError, errorMessages, scope } = this.props
     return (
       <Context.Provider
         value={{
           value,
+          scope,
           onChange,
           register: this.register,
           resetError: this.resetError,
@@ -114,20 +124,38 @@ class FormItem extends React.Component<P, State> {
   }
 }
 
-const ConnectedFormItem: ComponentType<FormItemProps> = ({
+type ConnectedFormItemProps<V = any> = FormItemProps<V> & {
+  children:
+    | ((props: {
+        value: V
+        onChange: (value: V) => void
+        error: ValidatorResult
+      }) => ReactNode)
+    | ReactNode
+}
+
+const ConnectedFormItem: ComponentType<ConnectedFormItemProps> = ({
   name,
-  defaultValue,
   errorMessages,
-  interceptor,
   ...props
 }) => (
   <Context.Consumer>
-    {({ value, onChange, errorMessages: ctxErrorMessages, ...context }) => {
-      const target = name ? get(value, name, defaultValue) : value
+    {({
+      value,
+      scope,
+      onChange,
+      errorMessages: ctxErrorMessages,
+      ...context
+    }) => {
+      const computedScope =
+        name !== '' && name !== undefined ? [...scope, name] : scope
+      const target = value.getIn(computedScope)
       return (
         <FormItem
-          value={target}
-          onChange={changeHandler(value, name, onChange, interceptor)}
+          target={target}
+          value={value}
+          scope={computedScope}
+          onChange={onChange}
           name={name}
           errorMessages={{ ...ctxErrorMessages, ...errorMessages }}
           {...context}

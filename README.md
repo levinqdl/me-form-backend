@@ -37,16 +37,17 @@ Form is the root of your form context, it provides form data to FormItem, useFor
 
 ### Props:
 
-| Prop          | Description                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------- |
-| children      | React elements rendered in Form<br/> or render prop: ({submit, value, error}) => {}           |
-| validator     | a callback called before onSubmit, return null for no error or an error descriptor            |
-| onSubmit      | callback called when form submit and all validator pass, receive the form data as argument    |
-| value         | pass form data from parent component, Form with value and changed props is in controlled mode |
-| onChange      | callback used in combination with "value" and is called when form data changes                |
-| initValue     | initial value for uncontrolled mode                                                           |
-| formTag       | bool type, whether render an html form tag, default false                                     |
-| errorMessages | an object, which keys are validator rules and values are corresponding error messages         |
+| Prop          | Description                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| children      | React elements rendered in Form<br/> or render prop: ({submit, value, error}) => {}                     |
+| validator     | a callback called before onSubmit, return null for no error or an error descriptor                      |
+| onSubmit      | callback called when form submit and all validator pass, receive the form data as argument              |
+| value         | pass form data from parent component, Form with value and changed props is in controlled mode           |
+| onChange      | callback used in combination with "value" and is called when form data changes                          |
+| initValue     | initial value for uncontrolled mode                                                                     |
+| defaultValue  | gets merged into initValue or value on some undefined field, usefull for some field is missing in value |
+| formTag       | bool type, whether render an html form tag, default false                                               |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages                   |
 
 ### Controlled vs Uncontrolled
 
@@ -64,6 +65,10 @@ Uncontrolled, pass initValue to Form component, you can get form data in submit 
 <Form initValue={...}>...</Form>
 ```
 
+### Why defaultValue can't be set on fields
+
+Because currently in React there's not a good way that a parent component can read props from descendant components, so in the first render the defaultValue prop of a field can't be available from value of ancestors. This can be confusing and this is against the data flow model of React.
+
 ## useFormItem
 
 useFormItem is a React custom hook. It connects a form control component with Form context
@@ -75,7 +80,6 @@ Usualy we just pass all props to useFormItem hook as input is just fine, all use
 | property      | description                                                                                    |
 | ------------- | ---------------------------------------------------------------------------------------------- |
 | name          | string for field name                                                                          |
-| defaultValue  | used when specified filed is undefined                                                         |
 | validator     | callback whenever field value changes, return null as no error, or an error descriptor         |
 | errorMessages | an object, which keys are validator rules and values are corresponding error messages          |
 | requied       | bool, shorthand for required validator                                                         |
