@@ -77,15 +77,38 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 Usualy we just pass all props to useFormItem hook as input is just fine, but you may want to control it, all used props listed below:
 
-| property      | description                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| name          | string for field name                                                                          |
-| validator     | callback whenever field value changes, return null as no error, or an error descriptor         |
-| errorMessages | an object, which keys are validator rules and values are corresponding error messages          |
-| requied       | bool, shorthand for required validator                                                         |
-| minLength     | number, shorthand for min length validator                                                     |
-| label         | ReactNode, it will be passed to dynamic error message function                                 |
-| interceptor   | a function called when field value changes, receive changed value, can be used like trim input |
+| property      | description                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| name          | string for field name                                                                                  |
+| validator     | callback whenever field value changes, return null as no error, or an error descriptor                 |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages                  |
+| requied       | bool, shorthand for required validator                                                                 |
+| minLength     | number, shorthand for min length validator                                                             |
+| label         | ReactNode, it will be passed to dynamic error message function                                         |
+| interceptor   | a function called when field value changes, receive changed value, can be used like trim input         |
+| didUpdate     | a callback that called when a field is confirmed to change, receive changed value and a patch fucntion |
+
+#### didUpdate v.s. interceptor
+
+- interceptor is called right before a field value is changed, and it only provide the changed value. It's easy to use, but only can change the changed value
+- didUpdate is called before the changed value is committed, aka set the Form internal state in uncontrolled mode or call onChange prop of Form in controlled mode. It is provide the changed value and a patch function for the Form value, you can use the patch function change or remove any other fields of the Form, it's useful when you want to accomplish associated field changing
+
+```javascript
+<Form initValue={{a: "", b: ""}}>
+<Input
+  ...
+  name="a"
+  didUpdate={(changedValue, patch) => {
+    if (changedValue) {
+      patch({b: "b also changed", c: "c added"}) // when a changing to true, set b and add c
+    } else {
+      patch({b: ""}, "c") // when a changing to false, reset b, and remove c
+    }
+  }}
+/>
+</Form>
+
+```
 
 ### Output Options
 

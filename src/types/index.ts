@@ -24,6 +24,8 @@ export interface ErrorMessages {
 
 export type Patch = (payload: Partial<Value>, removeKey?: string) => void
 
+export type DidUpdate = (changeValue: any, patch: Patch) => void
+
 export type FormItemProps<V = any> = {
   name?: string
   label?: string
@@ -31,7 +33,7 @@ export type FormItemProps<V = any> = {
   minLength?: number
   validator?: (value: any) => ValidatorResult
   interceptor?: (value: V) => V
-  didUpdate?: (changeValue: any, patch: Patch) => void
+  didUpdate?: DidUpdate
   errorMessages?: ErrorMessages
 }
 

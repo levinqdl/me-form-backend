@@ -1,18 +1,17 @@
 import { mergeDeep, removeIn } from 'immutable'
-import { ContextValue } from '../Context'
 import { Patch } from '../types'
-import { Value } from '../Form'
 import { Key } from 'react'
+import { Value } from '../Form'
 
-export const patch = (
-  value: Value,
-  onChange: ContextValue['onChange'],
-): Patch => (payload, removeKey) => {
+export const patch = (value: Value, commit: (value: Value) => void): Patch => (
+  payload,
+  removeKey,
+) => {
   let nextValue = mergeDeep(value, payload)
   if (removeKey) {
     nextValue = removeIn(nextValue, removeKey.split('.'))
   }
-  onChange(nextValue)
+  commit(nextValue)
 }
 
 export const appendScope = (scope: Key[], name: string) =>

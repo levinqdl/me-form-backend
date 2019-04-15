@@ -1,7 +1,7 @@
 import React, { ComponentType, ChangeEvent } from 'react'
 
 const NativeInput: ComponentType<{
-  id: string
+  id?: string
   label: string
   value: string
   onChange: (e: ChangeEvent<HTMLInputElement>) => void

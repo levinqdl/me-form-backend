@@ -48,9 +48,6 @@ const useFormItem: (formProps: FormItemProps) => any = ({
     if (!is(target, prevTarget.current)) {
       prevTarget.current = target
       validate()
-      if (didUpdate) {
-        didUpdate(target, patch(value, onChange))
-      }
     }
     validateRef.current = validate
   })
@@ -79,7 +76,7 @@ const useFormItem: (formProps: FormItemProps) => any = ({
   const computedScope = appendScope(scope, name)
   return {
     value: target,
-    onChange: (v: any) => onChange(interceptor(v), computedScope),
+    onChange: (v: any) => onChange(interceptor(v), computedScope, didUpdate),
     error: parseError(),
     resetError,
     label,

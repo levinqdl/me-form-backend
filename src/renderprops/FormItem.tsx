@@ -56,16 +56,13 @@ class FormItem extends React.Component<P, State> {
     this.unregister()
   }
   componentDidUpdate(prevProps: P) {
-    const { value, target, onChange, didUpdate } = this.props
+    const { target } = this.props
     if (!is(target, prevProps.target)) {
       this.validate()
-      if (didUpdate) {
-        didUpdate(target, patch(value, onChange))
-      }
     }
   }
   getError() {
-    const { errorMessages, label } = this.props
+    const { errorMessages } = this.props
     const { error } = this.state
     if (error) {
       const message = parseErrorMessage(error, errorMessages)
@@ -94,12 +91,13 @@ class FormItem extends React.Component<P, State> {
       onChange,
       interceptor = (v: any) => v,
       scope,
+      didUpdate,
     } = this.props
     return typeof children === 'function'
       ? children({
           value: isImmutable(target) ? target.toJS() : target,
           onChange: (v: any) => {
-            onChange(interceptor(v), scope)
+            onChange(interceptor(v), scope, didUpdate)
           },
           error: this.getError(),
           id: scope.join('.'),

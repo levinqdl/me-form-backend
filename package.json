@@ -1,6 +1,6 @@
 {
   "name": "me-form-backend",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "compose awesome forms",
   "main": "dist/index.js",
   "types": "src/index.ts",

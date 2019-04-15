@@ -1,10 +1,11 @@
 import React, { ReactElement } from 'react'
 import Context, { ContextValue } from './Context'
-import { ValidatorResult, ErrorMessages, Key } from './types'
+import { ValidatorResult, ErrorMessages, Key, DidUpdate } from './types'
 import { XOR } from './types/typeUtils'
 import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
+import { patch } from './utils'
 
 export type Value = {
   [key: string]: any
@@ -53,13 +54,20 @@ class Form extends React.Component<Props, State> {
       onSubmit(this.state.value.toJS())
     }
   }
-  onChange = (value: any, keyPath: Key[] = []) => {
+  onChange = (value: any, keyPath: Key[] = [], didUpdate: DidUpdate) => {
+    const commit = (nextValue: any) => {
+      const { onChange } = this.props
+      if (onChange) {
+        onChange(nextValue.toJS())
+      } else {
+        this.setState({ value: nextValue })
+      }
+    }
     const nextValue = setIn(this.state.value, keyPath, value)
-    const { onChange } = this.props
-    if (onChange) {
-      onChange(nextValue.toJS())
+    if (didUpdate) {
+      didUpdate(value, patch(nextValue, commit))
     } else {
-      this.setState({ value: nextValue })
+      commit(nextValue)
     }
   }
   validate = () => {

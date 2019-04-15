@@ -252,40 +252,89 @@ describe.each([
       fireEvent.change(input, { target: { value: ' hello world' } })
       expect(input).toHaveAttribute('value', 'hello world')
     })
-    test('update associated fields', () => {
-      const Container = () => {
-        return (
-          <Form initValue={{ a: '', b: '', c: 'c' }}>
-            {({ data }) => (
-              <>
-                <Input
-                  name="a"
-                  label="a"
-                  didUpdate={(
-                    changedValue: string,
-                    patch: (v: any, removePath?: string) => void,
-                  ) => {
-                    if (changedValue === '0') {
-                      patch({ b: 'false' }, 'c')
-                    } else {
-                      patch({ b: 'true' })
-                    }
-                  }}
-                />
-                <Input name="b" label="b" />
-                <span>c is {data.c || 'removed'}</span>
-              </>
-            )}
-          </Form>
+    describe('update associated fields', () => {
+      test('uncontrolled mode', () => {
+        const Container = () => {
+          return (
+            <Form initValue={{ a: '', b: '', c: 'c' }}>
+              {({ data }) => (
+                <>
+                  <Input
+                    name="a"
+                    label="a"
+                    didUpdate={(
+                      changedValue: string,
+                      patch: (v: any, removePath?: string) => void,
+                    ) => {
+                      if (changedValue === '0') {
+                        patch({ b: 'false' }, 'c')
+                      } else {
+                        patch({ b: 'true' })
+                      }
+                    }}
+                  />
+                  <Input name="b" label="b" />
+                  <span>c is {'c' in data ? data.c : 'removed'}</span>
+                </>
+              )}
+            </Form>
+          )
+        }
+        const { getByLabelText, getByText } = render(<Container />)
+        getByText('c is c')
+        fireEvent.change(getByLabelText('a'), { target: { value: '0' } })
+        expect(getByLabelText('b')).toHaveAttribute('value', 'false')
+        getByText('c is removed')
+        fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
+        expect(getByLabelText('b')).toHaveAttribute('value', 'true')
+      })
+      test('controlled mode', () => {
+        const handleChange = jest.fn()
+        const Container = ({ value }: any) => {
+          return (
+            <Form value={value} onChange={handleChange}>
+              {({ data }) => (
+                <>
+                  <Input
+                    name="a"
+                    label="a"
+                    didUpdate={(
+                      changedValue: string,
+                      patch: (v: any, removePath?: string) => void,
+                    ) => {
+                      if (changedValue === '0') {
+                        patch({ b: 'false' }, 'c')
+                      } else {
+                        patch({ b: 'true' })
+                      }
+                    }}
+                  />
+                  <Input name="b" label="b" />
+                  <span>c is {'c' in data ? data.c : 'removed'}</span>
+                </>
+              )}
+            </Form>
+          )
+        }
+        const { getByText, getByLabelText, rerender } = render(
+          <Container value={{ a: '', b: '', c: 'c' }} />,
         )
-      }
-      const { getByLabelText, getByText } = render(<Container />)
-      getByText('c is c')
-      fireEvent.change(getByLabelText('a'), { target: { value: '0' } })
-      expect(getByLabelText('b')).toHaveAttribute('value', 'false')
-      getByText('c is removed')
-      fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
-      expect(getByLabelText('b')).toHaveAttribute('value', 'true')
+        getByText('c is c')
+        fireEvent.change(getByLabelText('a'), { target: { value: '0' } })
+        expect(handleChange).toBeCalledTimes(1)
+        expect(handleChange).toHaveBeenLastCalledWith({ a: '0', b: 'false' })
+
+        rerender(<Container value={{ a: '0', b: 'false', c: 'still here' }} />)
+        expect(getByLabelText('b')).toHaveAttribute('value', 'false')
+        getByText('c is still here')
+        fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
+        expect(handleChange).toHaveBeenCalledTimes(2)
+        expect(handleChange).toHaveBeenLastCalledWith({
+          a: '1',
+          b: 'true',
+          c: 'still here',
+        })
+      })
     })
     test('id', () => {
       const { getByLabelText, getByText } = render(
