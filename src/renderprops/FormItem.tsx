@@ -4,6 +4,7 @@ import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps, ValidatorResult } from '../types'
 import { patch, appendScope } from '../utils'
+import * as validators from '../utils/validators'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 
@@ -38,7 +39,9 @@ class FormItem extends React.Component<P, State> {
     const { validator, required, minLength, label } = this.props
     if (required) {
       return (value: string) =>
-        value ? null : { rule: 'required', labels: [label] }
+        validators.required(value)
+          ? null
+          : { rule: 'required', labels: [label] }
     }
     if (minLength) {
       return (value: string) =>

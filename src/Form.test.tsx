@@ -66,7 +66,7 @@ describe.each([
       fireEvent.change(input, { target: { value: '' } })
       getByText('f1 is required')
     })
-    it('validator shorthand: required', () => {
+    it('predefined validator: required', () => {
       const { queryByText, getByLabelText, getByText } = render(
         <Form initValue={{ f1: '' }}>
           <Input label="f1" name="f1" required errorMessages={errorMessages} />
@@ -77,6 +77,8 @@ describe.each([
       fireEvent.change(input, { target: { value: 'xxx' } })
       fireEvent.change(input, { target: { value: '' } })
       getByText('f1 is required')
+      fireEvent.change(input, { target: { value: 0 } })
+      expect(queryByText('f1 is required')).toBeNull()
     })
     it('default error message is rule name', () => {
       const { queryByText, getByLabelText, getByText } = render(

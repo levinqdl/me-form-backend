@@ -4,6 +4,7 @@ import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
 import { patch, appendScope } from '../utils'
+import * as validators from '../utils/validators'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = ({
@@ -32,7 +33,7 @@ const useFormItem: (formProps: FormItemProps) => any = ({
     let error = null
     if (validator) {
       error = validator(target)
-    } else if (required && !target) {
+    } else if (required && !validators.required(target)) {
       error = { rule: 'required', labels: [label] }
     } else if (minLength) {
       error =
