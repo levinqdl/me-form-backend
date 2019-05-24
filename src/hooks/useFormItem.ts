@@ -5,6 +5,7 @@ import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
 import { patch, appendScope } from '../utils'
 import * as validators from '../utils/validators'
+import { restElement } from '@babel/types'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = ({
@@ -16,6 +17,7 @@ const useFormItem: (formProps: FormItemProps) => any = ({
   label,
   interceptor = v => v,
   didUpdate,
+  ...rest
 }) => {
   const {
     value,
@@ -76,6 +78,7 @@ const useFormItem: (formProps: FormItemProps) => any = ({
   }
   const computedScope = appendScope(scope, name)
   return {
+    ...rest,
     value: target,
     onChange: (v: any) => onChange(interceptor(v), computedScope, didUpdate),
     error: parseError(),
