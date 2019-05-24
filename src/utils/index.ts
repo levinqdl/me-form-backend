@@ -3,7 +3,7 @@ import { Patch } from '../types'
 import { Key } from 'react'
 import { Value } from '../Form'
 
-export const patch = (value: Value, commit: (value: Value) => void): Patch => (
+export const patch = (value: Value, ref: { nextValue: any }): Patch => (
   payload,
   removeKey,
 ) => {
@@ -11,7 +11,7 @@ export const patch = (value: Value, commit: (value: Value) => void): Patch => (
   if (removeKey) {
     nextValue = removeIn(nextValue, removeKey.split('.'))
   }
-  commit(nextValue)
+  ref.nextValue = nextValue
 }
 
 export const appendScope = (scope: Key[], name: string) =>

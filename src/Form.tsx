@@ -64,11 +64,11 @@ class Form extends React.Component<Props, State> {
       }
     }
     const nextValue = setIn(this.state.value, keyPath, value)
+    const ref = { nextValue }
     if (didUpdate) {
-      didUpdate(value, patch(nextValue, commit))
-    } else {
-      commit(nextValue)
+      didUpdate(value, patch(nextValue, ref))
     }
+    commit(ref.nextValue)
   }
   validate = () => {
     let error = null
