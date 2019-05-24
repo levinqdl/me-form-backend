@@ -78,7 +78,7 @@ const useFormItem: (formProps: FormItemProps) => any = ({
   }
   const computedScope = appendScope(scope, name)
   return {
-    ...rest,
+    rest,
     value: target,
     onChange: (v: any) => onChange(interceptor(v), computedScope, didUpdate),
     error: parseError(),

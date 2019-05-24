@@ -16,7 +16,7 @@ npm install me-form-backend
 import Form, { useFormItem, FormItem, ArrayField } from 'me-form-backend'
 
 const Input = props => {
-  const { value, onChange, ...rest } = useFormItem(props)
+  const { value, onChange, rest } = useFormItem(props)
   return <input {...rest} value={value} onChange={onChange} />
 }
 
