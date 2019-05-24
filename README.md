@@ -15,9 +15,9 @@ npm install me-form-backend
 ```javascript
 import Form, { useFormItem, FormItem, ArrayField } from 'me-form-backend'
 
-const Input = ({ name }) => {
-  const { value, onChange } = useFormItem({ name })
-  return <input value={value} onChange={onChange} />
+const Input = props => {
+  const { value, onChange, ...rest } = useFormItem(props)
+  return <input {...rest} value={value} onChange={onChange} />
 }
 
 const App = () => (
@@ -75,7 +75,7 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 ### Input Options
 
-Usualy we just pass all props to useFormItem hook as input is just fine, but you may want to control it, all used props listed below:
+Usualy we just pass all props to useFormItem hook as input is just fine, useFormItem forwards all unknown props, but you may want to control it, all used props listed below:
 
 | property      | description                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
