@@ -66,7 +66,8 @@ class Form extends React.Component<Props, State> {
     const nextValue = setIn(this.state.value, keyPath, value)
     const ref = { nextValue }
     if (didUpdate) {
-      didUpdate(value, patch(nextValue, ref))
+      keyPath.pop()
+      didUpdate(value, patch(nextValue, keyPath, ref))
     }
     commit(ref.nextValue)
   }

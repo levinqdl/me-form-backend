@@ -4,6 +4,7 @@ import Form from './Form'
 import FormItem from './renderprops/FormItem'
 import { act } from 'react-dom/test-utils'
 import { useState } from 'react'
+import ArrayField from './renderprops/ArrayField'
 
 afterEach(cleanup)
 
@@ -336,6 +337,38 @@ describe.each([
           b: 'true',
           c: 'still here',
         })
+      })
+      test('didUpdate in ArrayField', () => {
+        const Container = () => {
+          return (
+            <Form initValue={[{ a: 0, b: 0 }]}>
+              {({ data }) => (
+                <>
+                  <div data-testid="count">{data.length}</div>
+                  <ArrayField>
+                    {({ index }) => (
+                      <div key={index}>
+                        <Input
+                          label="a"
+                          name="a"
+                          didUpdate={(a: number, patch: any) => {
+                            patch({ b: a })
+                          }}
+                        />
+                        <Input label="b" name="b" />
+                      </div>
+                    )}
+                  </ArrayField>
+                </>
+              )}
+            </Form>
+          )
+        }
+        const { getByLabelText, getByTestId } = render(<Container />)
+        const a = getByLabelText('a')
+        fireEvent.change(a, { target: { value: 1 } })
+        expect(getByLabelText('b')).toHaveAttribute('value', '1')
+        expect(getByTestId('count')).toHaveTextContent('1')
       })
     })
     test('id', () => {
