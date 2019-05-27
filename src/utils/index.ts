@@ -2,7 +2,7 @@ import { mergeDeep, removeIn, getIn, setIn } from 'immutable'
 import { Patch } from '../types'
 import { Key } from 'react'
 import { Value } from '../Form'
-import warning = require('warning')
+import warning from 'warning'
 
 export const patch = (
   value: Value,
