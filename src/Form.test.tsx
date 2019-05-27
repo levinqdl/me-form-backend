@@ -1,10 +1,17 @@
 import React, { RefObject } from 'react'
-import { render, fireEvent, cleanup } from 'react-testing-library'
-import Form from './Form'
-import FormItem from './renderprops/FormItem'
 import { act } from 'react-dom/test-utils'
-import { useState } from 'react'
+import {
+  cleanup,
+  fireEvent,
+  render,
+  getByLabelText,
+} from 'react-testing-library'
+import Form from './Form'
 import ArrayField from './renderprops/ArrayField'
+import FormItem from './renderprops/FormItem'
+import { useFormItem } from '.'
+import { FormItemProps } from './types'
+import Input from './hooks/Input'
 
 afterEach(cleanup)
 
@@ -492,5 +499,53 @@ describe('defaultValue', () => {
     )
     expect(getByLabelText('b')).toHaveAttribute('value', 'b changed')
     expect(getByLabelText('c')).toHaveAttribute('value', 'default c')
+  })
+})
+
+describe('change whole value', () => {
+  test('object value', () => {
+    const UpdateValue = (props: FormItemProps) => {
+      const { onChange } = useFormItem(props)
+      return (
+        <button
+          onClick={() => {
+            onChange({ a: 'a' })
+          }}
+        >
+          update
+        </button>
+      )
+    }
+    const { getByText, getByLabelText } = render(
+      <Form initValue={{}}>
+        <Input name="a" label="a" />
+        <UpdateValue />
+      </Form>,
+    )
+    const btn = getByText('update')
+    fireEvent.click(btn)
+    expect(getByLabelText('a')).toHaveAttribute('value', 'a')
+  })
+  test('array value', () => {
+    const UpdateValue = (props: FormItemProps) => {
+      const { onChange } = useFormItem(props)
+      return (
+        <button
+          onClick={() => {
+            onChange(['a'])
+          }}
+        >
+          update
+        </button>
+      )
+    }
+    const { getByText, getByLabelText } = render(
+      <Form initValue={[]}>
+        <Input name="0" label="zero" />
+        <UpdateValue />
+      </Form>,
+    )
+    fireEvent.click(getByText('update'))
+    expect(getByLabelText('zero')).toHaveAttribute('value', 'a')
   })
 })

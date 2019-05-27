@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react'
 import Context, { ContextValue } from './Context'
 import { ValidatorResult, ErrorMessages, Key, DidUpdate } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
+import { fromJS, isImmutable, mergeDeep, setIn, isList } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { patch } from './utils'
@@ -63,7 +63,10 @@ class Form extends React.Component<Props, State> {
         this.setState({ value: nextValue })
       }
     }
-    const nextValue = setIn(this.state.value, keyPath, value)
+    const nextValue =
+      keyPath.length === 0
+        ? mergeDeep(this.state.value, value)
+        : setIn(this.state.value, keyPath, value)
     const ref = { nextValue }
     if (didUpdate) {
       keyPath.pop()
