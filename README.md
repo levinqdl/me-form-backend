@@ -77,16 +77,18 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 Usualy we just pass all props to useFormItem hook as input is just fine, useFormItem forwards all unknown props, but you may want to control it, all used props listed below:
 
-| property      | description                                                                                            |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| name          | string for field name                                                                                  |
-| validator     | callback whenever field value changes, return null as no error, or an error descriptor                 |
-| errorMessages | an object, which keys are validator rules and values are corresponding error messages                  |
-| requied       | bool, shorthand for required validator                                                                 |
-| minLength     | number, shorthand for min length validator                                                             |
-| label         | ReactNode, it will be passed to dynamic error message function                                         |
-| interceptor   | a function called when field value changes, receive changed value, can be used like trim input         |
-| didUpdate     | a callback that called when a field is confirmed to change, receive changed value and a patch fucntion |
+| property      | description                                                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| name          | string for field name                                                                                                            |
+| validator     | callback whenever field value changes, return null as no error, or an error descriptor                                           |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages                                            |
+| requied       | bool, shorthand for required validator                                                                                           |
+| minLength     | number, shorthand for min length validator                                                                                       |
+| label         | ReactNode, it will be passed to dynamic error message function                                                                   |
+| parse         | a function called when field value changes, receive changed value, can be used like trim input or parse date from string         |
+| format        | a function called when pass value to control component, receive current value, can be used when format date to string            |
+| interceptor   | [Deprecated] use `parse` instead. A function called when field value changes, receive changed value, can be used like trim input |
+| didUpdate     | a callback that called when a field is confirmed to change, receive changed value and a patch fucntion                           |
 
 #### didUpdate v.s. interceptor
 
@@ -203,3 +205,16 @@ Form validation is different from fields validation at trigger timing.
 Form validation is triggered when form is to be submitted, and it triggers all fields' validators first, and at last is the validator defined at Form.
 
 Other validators, defined at FormItem or useFormItem, is triggered when the field value changes.
+
+## Recipes
+
+### parse & format
+
+```jsx
+const DateInput = () => (
+  <Input
+    parse={date => date.format('YYYY-MM-DD')}
+    format={s => moment(s, 'YYYY-MM-DD')}
+  />
+)
+```

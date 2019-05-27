@@ -33,6 +33,8 @@ export type FormItemProps<V = any> = {
   minLength?: number
   validator?: (value: any) => ValidatorResult
   interceptor?: (value: V) => V
+  parse?: (value: V) => V
+  format?: (value: V) => V
   didUpdate?: DidUpdate
   errorMessages?: ErrorMessages
 }

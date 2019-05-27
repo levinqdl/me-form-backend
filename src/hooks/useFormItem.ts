@@ -3,22 +3,28 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
-import { patch, appendScope } from '../utils'
+import { patch, appendScope, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
 import { restElement } from '@babel/types'
+import warning from 'warning'
 
 // TODO: define return type
-const useFormItem: (formProps: FormItemProps) => any = ({
-  name,
-  validator,
-  errorMessages,
-  required,
-  minLength,
-  label,
-  interceptor = v => v,
-  didUpdate,
-  ...rest
-}) => {
+const useFormItem: (formProps: FormItemProps) => any = props => {
+  warnInterceptor(props)
+  const {
+    name,
+    validator,
+    errorMessages,
+    required,
+    minLength,
+    label,
+    interceptor,
+    didUpdate,
+    format = (s: any) => s,
+    parse,
+    ...rest
+  } = props
+  const parser = parse || interceptor || (v => v)
   const {
     value,
     onChange,
@@ -79,8 +85,8 @@ const useFormItem: (formProps: FormItemProps) => any = ({
   const computedScope = appendScope(scope, name)
   return {
     rest,
-    value: target,
-    onChange: (v: any) => onChange(interceptor(v), computedScope, didUpdate),
+    value: format(target),
+    onChange: (v: any) => onChange(parser(v), computedScope, didUpdate),
     error: parseError(),
     resetError,
     label,

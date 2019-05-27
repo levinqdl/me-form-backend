@@ -8,13 +8,6 @@ import ArrayField from './renderprops/ArrayField'
 
 afterEach(cleanup)
 
-// const FormItem = withForm({
-//   parser: ({ target: { value } }: ChangeEvent<HTMLInputElement>) => value,
-//   errorMessages: {
-//     required: label => `${label} is required`
-//   }
-// })
-
 const errorMessages = { required: 'f1 is required' }
 
 describe.each([
@@ -31,7 +24,7 @@ describe.each([
       getByText('form content')
       expect(container.querySelector('form')).toBeNull()
     })
-    it('form tag', () => {
+    test('form tag', () => {
       const { container } = render(
         <Form initValue={{}} formTag>
           <span>form content</span>
@@ -39,7 +32,7 @@ describe.each([
       )
       expect(container.querySelector('form')).not.toBeNull()
     })
-    it('provide value & onChange for fields', () => {
+    it('provides value & onChange for fields', () => {
       const { getByLabelText } = render(
         <Form initValue={{ f1: 'a' }}>
           <Input label="f1" name="f1" />
@@ -50,7 +43,7 @@ describe.each([
       fireEvent.change(input, { target: { value: 'f1 changed' } })
       expect(input).toHaveAttribute('value', 'f1 changed')
     })
-    it('validator triggered after touched', () => {
+    test('validator triggered after touched', () => {
       const { getByLabelText, queryByText, getByText } = render(
         <Form initValue={{ f1: '' }}>
           <Input
@@ -67,7 +60,7 @@ describe.each([
       fireEvent.change(input, { target: { value: '' } })
       getByText('f1 is required')
     })
-    it('predefined validator: required', () => {
+    test('predefined validator: required', () => {
       const { queryByText, getByLabelText, getByText } = render(
         <Form initValue={{ f1: '' }}>
           <Input label="f1" name="f1" required errorMessages={errorMessages} />
@@ -81,7 +74,7 @@ describe.each([
       fireEvent.change(input, { target: { value: 0 } })
       expect(queryByText('f1 is required')).toBeNull()
     })
-    it('default error message is rule name', () => {
+    test('default error message is rule name', () => {
       const { queryByText, getByLabelText, getByText } = render(
         <Form initValue={{ f1: '' }}>
           <Input label="f1" name="f1" required />
@@ -93,7 +86,7 @@ describe.each([
       fireEvent.change(input, { target: { value: '' } })
       getByText('required')
     })
-    it('validator not triggered by other fields', () => {
+    test('validator not triggered by other fields', () => {
       const { queryByText, getByLabelText, getByText } = render(
         <Form initValue={{ f1: '' }}>
           <Input
@@ -118,7 +111,7 @@ describe.each([
       getByText('f1 required')
       expect(queryByText('f2 required')).toBeNull()
     })
-    it('renderprop children: submit, data, error', () => {
+    test('renderprop children: submit, data, error', () => {
       const handleSubmit = jest.fn()
       const { getByLabelText, getByText, queryByText } = render(
         <Form
@@ -174,7 +167,7 @@ describe.each([
       fireEvent.click(submitButton)
       expect(handleSubmit).toBeCalled()
     })
-    it('predefined validator: minLength', () => {
+    test('predefined validator: minLength', () => {
       const { getByText, getByLabelText, queryByText } = render(
         <Form initValue={{ f1: '' }}>
           {() => (
@@ -210,7 +203,7 @@ describe.each([
       )
       expect(input).toHaveAttribute('value', 'f1 changed')
     })
-    it('errorMessages at Form', () => {
+    test('errorMessages at Form', () => {
       const { getByText } = render(
         <Form
           initValue={{ g1: { a: 'a', b: 'b', c: '' }, g2: { c: '', d: '' } }}
@@ -254,6 +247,32 @@ describe.each([
       const input = getByLabelText('a')
       fireEvent.change(input, { target: { value: ' hello world' } })
       expect(input).toHaveAttribute('value', 'hello world')
+    })
+    test('format & parse', () => {
+      const onChange = jest.fn()
+      const Container = ({ value }: any) => (
+        <Form value={value} onChange={onChange}>
+          <Input
+            format={(n: number) => n.toString()}
+            parse={(s: string) => Number(s)}
+            name="a"
+            label="a"
+          />
+        </Form>
+      )
+      const { getByLabelText, rerender } = render(
+        <Container value={{ a: '' }} />,
+      )
+      const input = getByLabelText('a')
+      expect(input).toHaveAttribute('value', '')
+      fireEvent.change(input, { target: { value: '100' } })
+      expect(onChange).toHaveBeenLastCalledWith({ a: 100 })
+      rerender(<Container value={{ a: 100 }} />)
+      expect(input).toHaveAttribute('value', '100')
+      fireEvent.change(input, { target: { value: '' } })
+      expect(onChange).toHaveBeenLastCalledWith({ a: 0 })
+      rerender(<Container value={{ a: 0 }} />)
+      expect(input).toHaveAttribute('value', '0')
     })
     describe('update associated fields', () => {
       test('uncontrolled mode', () => {

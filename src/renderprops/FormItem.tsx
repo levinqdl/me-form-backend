@@ -1,9 +1,9 @@
-import { is, isImmutable, mergeDeep, removeIn } from 'immutable'
+import { is, isImmutable } from 'immutable'
 import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps, ValidatorResult } from '../types'
-import { patch, appendScope } from '../utils'
+import { appendScope, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
@@ -88,19 +88,23 @@ class FormItem extends React.Component<P, State> {
     this.setState({ error: null })
   }
   renderChildren = () => {
+    warnInterceptor(this.props)
     const {
       children,
       target,
       onChange,
-      interceptor = (v: any) => v,
+      interceptor,
+      parse,
+      format = (s: any) => s,
       scope,
       didUpdate,
     } = this.props
+    const parser = parse || interceptor || (s => s)
     return typeof children === 'function'
       ? children({
-          value: isImmutable(target) ? target.toJS() : target,
+          value: format(isImmutable(target) ? target.toJS() : target),
           onChange: (v: any) => {
-            onChange(interceptor(v), scope, didUpdate)
+            onChange(parser(v), scope, didUpdate)
           },
           error: this.getError(),
           id: scope.join('.'),
