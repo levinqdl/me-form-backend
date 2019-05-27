@@ -1,4 +1,4 @@
-import { getIn, is, mergeDeep } from 'immutable'
+import { getIn, is, mergeDeep, isImmutable } from 'immutable'
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
@@ -85,7 +85,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   const computedScope = appendScope(scope, name)
   return {
     rest,
-    value: format(target),
+    value: format(isImmutable(target) ? target.toJS() : target),
     onChange: (v: any) => onChange(parser(v), computedScope, didUpdate),
     error: parseError(),
     resetError,
