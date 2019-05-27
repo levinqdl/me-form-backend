@@ -1,17 +1,12 @@
 import React, { RefObject } from 'react'
 import { act } from 'react-dom/test-utils'
-import {
-  cleanup,
-  fireEvent,
-  render,
-  getByLabelText,
-} from 'react-testing-library'
+import { cleanup, fireEvent, render } from 'react-testing-library'
+import { useFormItem } from '.'
 import Form from './Form'
+import Input from './hooks/Input'
 import ArrayField from './renderprops/ArrayField'
 import FormItem from './renderprops/FormItem'
-import { useFormItem } from '.'
 import { FormItemProps } from './types'
-import Input from './hooks/Input'
 
 afterEach(cleanup)
 
@@ -41,14 +36,17 @@ describe.each([
     })
     it('provides value & onChange for fields', () => {
       const { getByLabelText } = render(
-        <Form initValue={{ f1: 'a' }}>
+        <Form initValue={{ f1: 'a', '0': 'zero' }}>
           <Input label="f1" name="f1" />
+          <Input label="zero" name={0} />
         </Form>,
       )
       const input = getByLabelText('f1')
       expect(input).toHaveAttribute('value', 'a')
       fireEvent.change(input, { target: { value: 'f1 changed' } })
       expect(input).toHaveAttribute('value', 'f1 changed')
+      const zero = getByLabelText('zero')
+      expect(zero).toHaveAttribute('value', 'zero')
     })
     test('validator triggered after touched', () => {
       const { getByLabelText, queryByText, getByText } = render(

@@ -18,8 +18,10 @@ export const patch = (
   ref.nextValue = nextValue
 }
 
-export const appendScope = (scope: Key[], name: string) =>
-  name !== '' && name !== undefined ? [...scope, name] : scope
+export const appendScope = (scope: Key[], name: string | number) =>
+  name !== '' && name !== undefined
+    ? [...scope, typeof name === 'number' ? name.toString() : name]
+    : scope
 
 export const warnInterceptor = ({ interceptor, parse }: any) => {
   warning(

@@ -34,7 +34,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     scope,
   } = useContext(Context)
   const [error, setError] = useState(null)
-  const target = name ? getIn(value, [...scope, name], '') : value
+  const target = value.getIn(appendScope(scope, name))
 
   const prevTarget = useRef(target)
   const validate = () => {
