@@ -65,7 +65,7 @@ class Form extends React.Component<Props, State> {
     }
     const nextValue =
       keyPath.length === 0
-        ? mergeDeep(this.state.value, value)
+        ? fromJS(value)
         : setIn(this.state.value, keyPath, value)
     const ref = { nextValue }
     if (didUpdate) {
