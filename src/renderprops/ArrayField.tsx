@@ -46,7 +46,7 @@ const ArrayField = ({ name, children, getKey }: Props) => {
   }, [id])
   const target = value.getIn(computedScope)
   return target.map((val: any, index: number) => {
-    const key = getKey ? getKey(val) : index
+    const key = getKey ? getKey(isImmutable(val) ? val.toJS() : val) : index
     return (
       <Provider
         key={key}
