@@ -1,6 +1,11 @@
-import React, { RefObject } from 'react'
+import React, { RefObject, useState } from 'react'
 import { act } from 'react-dom/test-utils'
-import { cleanup, fireEvent, render } from 'react-testing-library'
+import {
+  cleanup,
+  fireEvent,
+  render,
+  waitForElement,
+} from 'react-testing-library'
 import { useFormItem } from '.'
 import Form from './Form'
 import Input from './hooks/Input'
@@ -410,6 +415,48 @@ describe.each([
       expect(getByText('a')).toHaveAttribute('for', 'a.txt')
       expect(getByLabelText('b')).toHaveAttribute('id', 'b.txt')
       expect(getByText('b')).toHaveAttribute('for', 'b.txt')
+    })
+    test('register', async () => {
+      let id = 1
+      const onSubmit = jest.fn()
+      const Container = () => {
+        const [value, setValue] = useState([{ id }])
+        return (
+          <Form value={value} onChange={setValue} onSubmit={onSubmit}>
+            {({ submit }) => (
+              <div>
+                <ArrayField>
+                  {({ remove, value: { id } }) => {
+                    return (
+                      <div key={id}>
+                        <Input name="a" label={`a${id}`} required />
+                        <button onClick={remove}>{`remove a${id}`}</button>
+                      </div>
+                    )
+                  }}
+                </ArrayField>
+                <button
+                  onClick={() => {
+                    id += 1
+                    setValue([...value, { id }])
+                  }}
+                >
+                  add
+                </button>
+                <button onClick={submit}>submit</button>
+              </div>
+            )}
+          </Form>
+        )
+      }
+      const { getByText, getByLabelText, rerender } = render(<Container />)
+      fireEvent.click(getByText('add'))
+      rerender(<Container />)
+      await waitForElement(() => getByLabelText('a2'))
+      fireEvent.click(getByText('remove a1'))
+      fireEvent.click(getByText('submit'))
+      expect(onSubmit).not.toHaveBeenCalled()
+      await waitForElement(() => getByText('required'))
     })
   })
 
