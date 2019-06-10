@@ -1,8 +1,8 @@
 import React, { ReactNode, useRef, useContext, useEffect } from 'react'
 import Context from '../Context'
-import changeHandler from '../changeHandler'
 import { isImmutable } from 'immutable'
 import { Validatable } from '../types'
+import { Value } from '../Form'
 
 const { Provider } = Context
 
@@ -15,9 +15,10 @@ interface ChildParam {
 interface Props {
   name?: string
   children: (params: ChildParam) => ReactNode
+  getKey: (v: Value) => string
 }
 
-const ArrayField = ({ name, children }: Props) => {
+const ArrayField = ({ name, children, getKey }: Props) => {
   const items = useRef([])
   const {
     value,
@@ -44,35 +45,39 @@ const ArrayField = ({ name, children }: Props) => {
     })
   }, [id])
   const target = value.getIn(computedScope)
-  return target.map((val: any, index: number) => (
-    <Provider
-      key={index}
-      value={{
-        value,
-        scope: [...computedScope, index],
-        onChange,
-        register: (name: string, item: Validatable) => {
-          const map = items.current[index] || (items.current[index] = new Map())
-          map.set(name, item)
-          return () => {
-            map.delete(name)
-          }
-        },
-        resetError,
-        errorMessages,
-      }}
-    >
-      {children({
-        index,
-        value: isImmutable(val) ? val.toJS() : val,
-        remove: () => {
-          const x = target.delete(index)
-          items.current.splice(index, 1)
-          onChange(x, computedScope)
-        },
-      })}
-    </Provider>
-  ))
+  return target.map((val: any, index: number) => {
+    const key = getKey ? getKey(val) : index
+    return (
+      <Provider
+        key={key}
+        value={{
+          value,
+          scope: [...computedScope, index],
+          onChange,
+          register: (name: string, item: Validatable) => {
+            const map =
+              items.current[index] || (items.current[index] = new Map())
+            map.set(name, item)
+            return () => {
+              map.delete(name)
+            }
+          },
+          resetError,
+          errorMessages,
+        }}
+      >
+        {children({
+          index,
+          value: isImmutable(val) ? val.toJS() : val,
+          remove: () => {
+            const x = target.delete(index)
+            items.current.splice(index, 1)
+            onChange(x, computedScope)
+          },
+        })}
+      </Provider>
+    )
+  })
 }
 
 export default ArrayField
