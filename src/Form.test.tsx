@@ -5,6 +5,7 @@ import {
   fireEvent,
   render,
   waitForElement,
+  getByAltText,
 } from 'react-testing-library'
 import { useFormItem } from '.'
 import Form from './Form'
@@ -592,5 +593,15 @@ describe('change whole value', () => {
     )
     fireEvent.click(getByText('update'))
     expect(getByLabelText('zero')).toHaveAttribute('value', 'a')
+  })
+  test('init value', () => {
+    const { getByLabelText } = render(
+      <Form initValue={{ a: 'a' }}>
+        <Input name="a" label="a" initValue="c" />
+        <Input name="b" label="b" initValue="b" />
+      </Form>,
+    )
+    expect(getByLabelText('a')).toHaveAttribute('value', 'a')
+    expect(getByLabelText('b')).toHaveAttribute('value', 'b')
   })
 })

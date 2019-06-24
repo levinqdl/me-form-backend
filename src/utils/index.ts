@@ -1,10 +1,10 @@
-import { mergeDeep, removeIn, getIn, setIn } from 'immutable'
-import { Patch } from '../types'
+import { mergeDeep, removeIn, getIn, setIn, fromJS } from 'immutable'
+import { Patch, DidUpdate } from '../types'
 import { Key } from 'react'
 import { Value } from '../Form'
 import warning from 'warning'
 
-export const patch = (
+const patch = (
   value: Value,
   keyPath: Key[],
   ref: { nextValue: any },
@@ -16,6 +16,22 @@ export const patch = (
     nextValue = removeIn(nextValue, removeKey.split('.'))
   }
   ref.nextValue = nextValue
+}
+
+export const getNextValue = (
+  state: Value,
+  value: any,
+  keyPath: Key[] = [],
+  didUpdate: DidUpdate,
+) => {
+  const nextValue =
+    keyPath.length === 0 ? fromJS(value) : setIn(state, keyPath, value)
+  const ref = { nextValue }
+  if (didUpdate) {
+    keyPath.pop()
+    didUpdate(value, patch(nextValue, keyPath, ref))
+  }
+  return ref.nextValue
 }
 
 export const appendScope = (scope: Key[], name: string | number) =>

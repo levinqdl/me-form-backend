@@ -1,9 +1,9 @@
-import { is, isImmutable } from 'immutable'
+import { is, isImmutable, fromJS } from 'immutable'
 import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
-import { FormItemProps, ValidatorResult } from '../types'
-import { appendScope, warnInterceptor } from '../utils'
+import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
+import { appendScope, warnInterceptor, getNextValue } from '../utils'
 import * as validators from '../utils/validators'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
@@ -87,25 +87,48 @@ class FormItem extends React.Component<P, State> {
   resetError = () => {
     this.setState({ error: null })
   }
+  diffScope = (current: Key[], child: Key[]) => {
+    let i = 0
+    while (i < current.length && current[i] === child[i]) {
+      i++
+    }
+    const diffScope = []
+    while (i < child.length) {
+      diffScope.push(child[i])
+      i++
+    }
+    return diffScope
+  }
+  handleChange = (v: any, childScope: Key[], didUpdate: DidUpdate) => {
+    const {
+      parse,
+      interceptor,
+      onChange,
+      target,
+      scope: currentScope,
+      didUpdate: currentDidUpdate,
+    } = this.props
+    let nextValue = v
+    if (childScope) {
+      const diffScope = this.diffScope(currentScope, childScope)
+      nextValue = getNextValue(target, v, diffScope, didUpdate)
+    }
+    if (parse || interceptor) {
+      const parser = parse || interceptor || (s => s)
+      nextValue = fromJS(
+        parser(isImmutable(nextValue) ? nextValue.toJS() : nextValue),
+      )
+    }
+    onChange(nextValue, currentScope, currentDidUpdate)
+  }
   renderChildren = () => {
     warnInterceptor(this.props)
-    const {
-      children,
-      target,
-      onChange,
-      interceptor,
-      parse,
-      format = (s: any) => s,
-      scope,
-      didUpdate,
-    } = this.props
-    const parser = parse || interceptor || (s => s)
+    const { children, target, format = (s: any) => s, scope } = this.props
+
     return typeof children === 'function'
       ? children({
           value: format(isImmutable(target) ? target.toJS() : target),
-          onChange: (v: any) => {
-            onChange(parser(v), scope, didUpdate)
-          },
+          onChange: this.handleChange,
           error: this.getError(),
           id: scope.join('.'),
         })
@@ -118,7 +141,7 @@ class FormItem extends React.Component<P, State> {
         value={{
           value,
           scope,
-          onChange,
+          onChange: this.handleChange,
           register: this.register,
           resetError: this.resetError,
           errorMessages,

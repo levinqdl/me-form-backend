@@ -37,6 +37,7 @@ export type FormItemProps<V = any> = {
   format?: (value: V) => V
   didUpdate?: DidUpdate
   errorMessages?: ErrorMessages
+  initValue?: V
 }
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
@@ -51,3 +52,5 @@ export type FormProps<
 > = Omit<Props<ElementTypeOf<C>>, 'value' | 'onChange' | 'children'>
 
 export type Key = string | number
+
+export type Initializer = () => [Key[], Value]

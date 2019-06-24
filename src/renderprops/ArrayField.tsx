@@ -15,7 +15,7 @@ interface ChildParam {
 interface Props {
   name?: string
   children: (params: ChildParam) => ReactNode
-  getKey: (v: Value) => string
+  getKey?: (v: Value) => string
 }
 
 const ArrayField = ({ name, children, getKey }: Props) => {

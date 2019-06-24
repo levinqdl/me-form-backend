@@ -1,11 +1,18 @@
 import React, { ReactElement } from 'react'
 import Context, { ContextValue } from './Context'
-import { ValidatorResult, ErrorMessages, Key, DidUpdate } from './types'
+import {
+  ValidatorResult,
+  ErrorMessages,
+  Key,
+  DidUpdate,
+  Initializer,
+} from './types'
 import { XOR } from './types/typeUtils'
 import { fromJS, isImmutable, mergeDeep, setIn, isList } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
-import { patch } from './utils'
+import { getNextValue } from './utils'
+import Init from './Initializer'
 
 export type Value = {
   [key: string]: any
@@ -41,6 +48,19 @@ type State = ContextValue & {
 }
 
 class Form extends React.Component<Props, State> {
+  initializerQueue: Array<Initializer> = []
+  initialize = () => {
+    const { value } = this.state
+    let nextValue = null
+    while (this.initializerQueue.length) {
+      const initializer = this.initializerQueue.shift()
+      const [scope, v] = initializer()
+      nextValue = setIn(nextValue || value, scope, v)
+    }
+    if (nextValue) {
+      this.commit(nextValue)
+    }
+  }
   isControlled() {
     return 'value' in this.props
   }
@@ -54,25 +74,17 @@ class Form extends React.Component<Props, State> {
       onSubmit(this.state.value.toJS())
     }
   }
+  commit = (nextValue: any) => {
+    const { onChange } = this.props
+    if (onChange) {
+      onChange(nextValue.toJS())
+    } else {
+      this.setState({ value: nextValue })
+    }
+  }
   onChange = (value: any, keyPath: Key[] = [], didUpdate: DidUpdate) => {
-    const commit = (nextValue: any) => {
-      const { onChange } = this.props
-      if (onChange) {
-        onChange(nextValue.toJS())
-      } else {
-        this.setState({ value: nextValue })
-      }
-    }
-    const nextValue =
-      keyPath.length === 0
-        ? fromJS(value)
-        : setIn(this.state.value, keyPath, value)
-    const ref = { nextValue }
-    if (didUpdate) {
-      keyPath.pop()
-      didUpdate(value, patch(nextValue, keyPath, ref))
-    }
-    commit(ref.nextValue)
+    const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
+    this.commit(nextValue)
   }
   validate = () => {
     let error = null
@@ -87,7 +99,10 @@ class Form extends React.Component<Props, State> {
     return error
   }
   items: Map<string, Validatable> = new Map()
-  register = (name: string, item: Validatable) => {
+  register = (name: string, item: Validatable, initializer: Initializer) => {
+    if (initializer) {
+      this.initializerQueue.push(initializer)
+    }
     this.items.set(name, item)
     return () => {
       this.items.delete(name)
@@ -143,13 +158,15 @@ class Form extends React.Component<Props, State> {
           })
         : children
     return (
-      <Context.Provider value={contextValue}>
-        {formTag ? (
-          <form onSubmit={this.submitEventHandler}>{content}</form>
-        ) : (
-          content
-        )}
-      </Context.Provider>
+      <Init initialize={this.initialize}>
+        <Context.Provider value={contextValue}>
+          {formTag ? (
+            <form onSubmit={this.submitEventHandler}>{content}</form>
+          ) : (
+            content
+          )}
+        </Context.Provider>
+      </Init>
     )
   }
 }

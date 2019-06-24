@@ -1,12 +1,10 @@
-import { getIn, is, mergeDeep, isImmutable } from 'immutable'
+import { is, isImmutable, fromJS } from 'immutable'
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
-import { patch, appendScope, warnInterceptor } from '../utils'
+import { appendScope, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
-import { restElement } from '@babel/types'
-import warning from 'warning'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = props => {
@@ -22,6 +20,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     didUpdate,
     format = (s: any) => s,
     parse,
+    initValue,
     ...rest
   } = props
   const parser = parse || interceptor || (v => v)
@@ -34,7 +33,9 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     scope,
   } = useContext(Context)
   const [error, setError] = useState(null)
-  const target = value.getIn(appendScope(scope, name))
+  const computedScope = appendScope(scope, name)
+  const v = value.getIn(computedScope)
+  const target = v === void 0 ? initValue : v
 
   const prevTarget = useRef(target)
   const validate = () => {
@@ -63,9 +64,15 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
 
   useEffect(
     () =>
-      register(name, {
-        validate: () => validateRef.current(),
-      }),
+      register(
+        name,
+        {
+          validate: () => validateRef.current(),
+        },
+        v === void 0 &&
+          initValue !== void 0 &&
+          (() => [computedScope, initValue]),
+      ),
     [name],
   )
 
@@ -82,11 +89,12 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     }
     return null
   }
-  const computedScope = appendScope(scope, name)
   return {
     rest,
     value: format(isImmutable(target) ? target.toJS() : target),
-    onChange: (v: any) => onChange(parser(v), computedScope, didUpdate),
+    onChange: (v: any) => {
+      onChange(parser(v), computedScope, didUpdate)
+    },
     error: parseError(),
     resetError,
     label,
