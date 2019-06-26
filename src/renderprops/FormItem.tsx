@@ -1,8 +1,14 @@
-import { is, isImmutable, fromJS } from 'immutable'
+import { is, isImmutable, fromJS, setIn } from 'immutable'
 import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
-import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
+import {
+  FormItemProps,
+  ValidatorResult,
+  Key,
+  DidUpdate,
+  Initializer,
+} from '../types'
 import { appendScope, warnInterceptor, getNextValue } from '../utils'
 import * as validators from '../utils/validators'
 
@@ -135,7 +141,13 @@ class FormItem extends React.Component<P, State> {
       : children
   }
   render() {
-    const { value, onChange, resetError, errorMessages, scope } = this.props
+    const {
+      value,
+      resetError,
+      errorMessages,
+      scope,
+      enqueueInitializer,
+    } = this.props
     return (
       <Context.Provider
         value={{
@@ -145,6 +157,7 @@ class FormItem extends React.Component<P, State> {
           register: this.register,
           resetError: this.resetError,
           errorMessages,
+          enqueueInitializer,
         }}
       >
         <span onFocus={resetError}>{this.renderChildren()}</span>

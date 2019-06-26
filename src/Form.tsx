@@ -99,10 +99,12 @@ class Form extends React.Component<Props, State> {
     return error
   }
   items: Map<string, Validatable> = new Map()
-  register = (name: string, item: Validatable, initializer: Initializer) => {
+  enqueueInitializer = (initializer: Initializer) => {
     if (initializer) {
       this.initializerQueue.push(initializer)
     }
+  }
+  register = (name: string, item: Validatable) => {
     this.items.set(name, item)
     return () => {
       this.items.delete(name)
@@ -121,6 +123,7 @@ class Form extends React.Component<Props, State> {
     scope: [],
     onChange: this.onChange,
     register: this.register,
+    enqueueInitializer: this.enqueueInitializer,
     resetError: this.resetError,
     error: null,
     errorMessages: this.props.errorMessages,

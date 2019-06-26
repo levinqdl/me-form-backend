@@ -28,6 +28,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     value,
     onChange,
     register,
+    enqueueInitializer,
     resetError,
     errorMessages: ctxErrorMessages,
     scope,
@@ -62,19 +63,14 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     validateRef.current = validate
   })
 
-  useEffect(
-    () =>
-      register(
-        name,
-        {
-          validate: () => validateRef.current(),
-        },
-        v === void 0 &&
-          initValue !== void 0 &&
-          (() => [computedScope, initValue]),
-      ),
-    [name],
-  )
+  useEffect(() => {
+    if (v === void 0 && initValue !== void 0) {
+      enqueueInitializer(() => [computedScope, initValue])
+    }
+    return register(name, {
+      validate: () => validateRef.current(),
+    })
+  }, [name])
 
   const parseError = () => {
     if (error) {
