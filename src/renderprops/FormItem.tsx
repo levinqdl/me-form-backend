@@ -68,7 +68,10 @@ class FormItem extends React.Component<P, State> {
   }
   componentDidUpdate(prevProps: P) {
     const { target, disabled } = this.props
-    if (!is(target, prevProps.target) || disabled !== prevProps.disabled) {
+    if (
+      !is(target, prevProps.target) ||
+      (disabled !== prevProps.disabled && disabled)
+    ) {
       this.validate()
     }
   }

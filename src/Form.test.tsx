@@ -140,6 +140,9 @@ describe.each([
         <Contianer disabled={false} />,
       )
       expect(queryByText('f1 required')).toBeNull()
+      rerender(<Contianer disabled />)
+      rerender(<Contianer disabled={false} />)
+      expect(queryByText('f1 required')).toBeNull()
       const input = getByLabelText('f1')
       fireEvent.change(input, { target: { value: 'xxx' } })
       fireEvent.change(input, { target: { value: '' } })
