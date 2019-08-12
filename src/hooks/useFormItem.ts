@@ -21,6 +21,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     format = (s: any) => s,
     parse,
     initValue,
+    disabled,
     ...rest
   } = props
   const parser = parse || interceptor || (v => v)
@@ -41,16 +42,19 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   const prevTarget = useRef(target)
   const validate = () => {
     let error = null
-    if (validator) {
-      error = validator(target)
-    } else if (required && !validators.required(target)) {
-      error = { rule: 'required', labels: [label] }
-    } else if (minLength) {
-      error =
-        target.length >= minLength
-          ? null
-          : { rule: 'minLength', labels: [label] }
+    if (!disabled) {
+      if (validator) {
+        error = validator(target)
+      } else if (required && !validators.required(target)) {
+        error = { rule: 'required', labels: [label] }
+      } else if (minLength) {
+        error =
+          target.length >= minLength
+            ? null
+            : { rule: 'minLength', labels: [label] }
+      }
     }
+
     setError(error)
     return error
   }
@@ -86,7 +90,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     return null
   }
   return {
-    rest,
+    rest: { ...rest, disabled },
     value: format(isImmutable(target) ? target.toJS() : target),
     onChange: (v: any) => {
       onChange(parser(v), computedScope, didUpdate)

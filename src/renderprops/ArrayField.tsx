@@ -27,6 +27,7 @@ const ArrayField = ({ name, children, getKey }: Props) => {
     register,
     resetError,
     errorMessages,
+    enqueueInitializer,
   } = useContext(Context)
   const computedScope =
     name !== undefined && name !== '' ? [...scope, name] : scope
@@ -64,6 +65,7 @@ const ArrayField = ({ name, children, getKey }: Props) => {
           },
           resetError,
           errorMessages,
+          enqueueInitializer,
         }}
       >
         {children({

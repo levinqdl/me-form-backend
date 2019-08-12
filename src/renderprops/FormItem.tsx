@@ -32,11 +32,13 @@ class FormItem extends React.Component<P, State> {
         childrenError = item.validate(isSubmit) || childrenError
       }
     }
-    const { target } = this.props
+    const { target, disabled } = this.props
     const validator = this.getValidator()
     let error = null
-    if (validator) {
-      error = validator(isImmutable(target) ? target.toJS() : target)
+    if (!disabled) {
+      if (validator) {
+        error = validator(isImmutable(target) ? target.toJS() : target)
+      }
     }
     this.setState({ error })
     return error || childrenError

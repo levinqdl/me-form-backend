@@ -122,6 +122,25 @@ describe.each([
       getByText('f1 required')
       expect(queryByText('f2 required')).toBeNull()
     })
+    test('validator not triggered on disabled item', () => {
+      const { queryByText, getByLabelText, getByText } = render(
+        <Form initValue={{ f1: '' }}>
+          <Input
+            label="f1"
+            name="f1"
+            required
+            disabled
+            errorMessages={{ required: 'f1 required' }}
+          />
+        </Form>,
+      )
+      expect(queryByText('f1 required')).toBeNull()
+      expect(queryByText('f2 required')).toBeNull()
+      const input = getByLabelText('f1')
+      fireEvent.change(input, { target: { value: 'xxx' } })
+      fireEvent.change(input, { target: { value: '' } })
+      expect(queryByText('f1 required')).toBeNull()
+    })
     test('renderprop children: submit, data, error', () => {
       const handleSubmit = jest.fn()
       const { getByLabelText, getByText, queryByText } = render(

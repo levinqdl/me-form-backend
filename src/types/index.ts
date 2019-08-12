@@ -38,6 +38,7 @@ export type FormItemProps<V = any> = {
   didUpdate?: DidUpdate
   errorMessages?: ErrorMessages
   initValue?: V
+  disabled?: boolean
 }
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never
