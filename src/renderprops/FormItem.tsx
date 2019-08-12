@@ -67,8 +67,8 @@ class FormItem extends React.Component<P, State> {
     this.unregister()
   }
   componentDidUpdate(prevProps: P) {
-    const { target } = this.props
-    if (!is(target, prevProps.target)) {
+    const { target, disabled } = this.props
+    if (!is(target, prevProps.target) || disabled !== prevProps.disabled) {
       this.validate()
     }
   }

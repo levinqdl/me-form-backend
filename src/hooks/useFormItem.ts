@@ -40,6 +40,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   const target = v === void 0 ? initValue : v
 
   const prevTarget = useRef(target)
+  const pervDisabled = useRef(disabled)
   const validate = () => {
     let error = null
     if (!disabled) {
@@ -60,13 +61,13 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
-    if (!is(target, prevTarget.current)) {
+    if (!is(target, prevTarget.current) || disabled !== pervDisabled.current) {
       prevTarget.current = target
+      pervDisabled.current = disabled
       validate()
     }
     validateRef.current = validate
   })
-
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
       enqueueInitializer(() => [computedScope, initValue])
@@ -90,7 +91,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     return null
   }
   return {
-    rest: { ...rest, disabled },
+    rest,
     value: format(isImmutable(target) ? target.toJS() : target),
     onChange: (v: any) => {
       onChange(parser(v), computedScope, didUpdate)
@@ -98,6 +99,8 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     error: parseError(),
     resetError,
     label,
+    disabled,
+    required,
     id: computedScope.join('.'),
   }
 }
