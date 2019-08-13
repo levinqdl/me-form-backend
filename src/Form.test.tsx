@@ -5,7 +5,6 @@ import {
   fireEvent,
   render,
   waitForElement,
-  getByAltText,
 } from 'react-testing-library'
 import { useFormItem } from '.'
 import Form from './Form'
@@ -126,26 +125,28 @@ describe.each([
       const Contianer = ({ disabled }: any) => {
         return (
           <Form initValue={{ f1: '' }}>
-            <Input
-              label="f1"
-              name="f1"
-              required
-              disabled={disabled}
-              errorMessages={{ required: 'f1 required' }}
-            />
+            {({ submit }) => (
+              <>
+                <Input
+                  label="f1"
+                  name="f1"
+                  required
+                  disabled={disabled}
+                  errorMessages={{ required: 'f1 required' }}
+                />
+                <button onClick={submit}>submit</button>
+              </>
+            )}
           </Form>
         )
       }
       const { queryByText, getByLabelText, getByText, rerender } = render(
-        <Contianer disabled={false} />,
+        <Contianer disabled />,
       )
       expect(queryByText('f1 required')).toBeNull()
-      rerender(<Contianer disabled />)
       rerender(<Contianer disabled={false} />)
       expect(queryByText('f1 required')).toBeNull()
-      const input = getByLabelText('f1')
-      fireEvent.change(input, { target: { value: 'xxx' } })
-      fireEvent.change(input, { target: { value: '' } })
+      fireEvent.click(getByText('submit'))
       getByText('f1 required')
       rerender(<Contianer disabled />)
       expect(queryByText('f1 required')).toBeNull()

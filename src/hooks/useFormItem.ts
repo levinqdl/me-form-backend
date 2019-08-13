@@ -61,15 +61,18 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
+    const disabledChanged = () => {
+      return
+    }
     if (
       !is(target, prevTarget.current) ||
       (disabled !== pervDisabled.current && disabled)
     ) {
       prevTarget.current = target
-      pervDisabled.current = disabled
       validate()
     }
     validateRef.current = validate
+    pervDisabled.current = disabled
   })
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
