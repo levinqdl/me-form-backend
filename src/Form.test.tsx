@@ -397,6 +397,19 @@ describe.each([
           c: 'still here',
         })
       })
+      test('ArrayField initValue', () => {
+        const Container = () => {
+          return (
+            <Form initValue={{}}>
+              <ArrayField name="arr" initValue={['foo']}>
+                {({ index }) => <Input label={`f${index}`} />}
+              </ArrayField>
+            </Form>
+          )
+        }
+        const { getByLabelText } = render(<Container />)
+        expect(getByLabelText('f0')).toHaveAttribute('value', 'foo')
+      })
       test('didUpdate in ArrayField', () => {
         const Container = () => {
           return (

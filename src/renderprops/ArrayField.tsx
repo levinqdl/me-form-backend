@@ -1,6 +1,6 @@
 import React, { ReactNode, useRef, useContext, useEffect } from 'react'
 import Context from '../Context'
-import { isImmutable } from 'immutable'
+import { isImmutable, fromJS, setIn } from 'immutable'
 import { Validatable } from '../types'
 import { Value } from '../Form'
 
@@ -16,9 +16,14 @@ interface Props {
   name?: string
   children: (params: ChildParam) => ReactNode
   getKey?: (v: Value) => string
+  initValue?: Value
 }
 
-const ArrayField = ({ name, children, getKey }: Props) => {
+const ArrayField = ({ name, children, getKey, initValue }: Props) => {
+  const patchInitValue = useRef(initValue ? true : false)
+  useEffect(() => {
+    patchInitValue.current = false
+  }, [])
   const items = useRef([])
   const {
     value,
@@ -45,14 +50,23 @@ const ArrayField = ({ name, children, getKey }: Props) => {
       },
     })
   }, [id])
-  const target = value.getIn(computedScope)
+
+  const v = value.getIn(computedScope)
+  useEffect(() => {
+    if (v === void 0 && initValue !== void 0) {
+      enqueueInitializer(() => [computedScope, initValue])
+    }
+  }, [name])
+  const target = v === void 0 ? fromJS(initValue) : v
   return target.map((val: any, index: number) => {
     const key = getKey ? getKey(isImmutable(val) ? val.toJS() : val) : index
     return (
       <Provider
         key={key}
         value={{
-          value,
+          value: patchInitValue.current
+            ? setIn(value, computedScope, initValue)
+            : value,
           scope: [...computedScope, index],
           onChange,
           register: (name: string, item: Validatable) => {

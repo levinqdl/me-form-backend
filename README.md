@@ -21,11 +21,14 @@ const Input = props => {
 }
 
 const App = () => (
-  <Form initValue={{ f1: { a: 'a' }, f2: ['', ''] }} onSubmit={formData => {}}>
+  <Form
+    initValue={{ f1: { a: 'a' }, f2: [{ text: 'foo' }, { text: 'bar' }] }}
+    onSubmit={formData => {}}
+  >
     <FormItem name="f1">
       <Input name="a" />
     </FormItem>
-    <ArrayField name="f2">{({ index }) => <Input name={index} />}</ArrayField>
+    <ArrayField name="f2">{() => <Input name="text" />}</ArrayField>
     <button>submit</button>
   </Form>
 )
@@ -146,16 +149,29 @@ It receives all options of useFormItem as props.
 
 ArrayField is a shorthand for iterate over an array field, which uses children as render prop for each item's render.
 
+In the childern render, context is transformed to each item.
+
 ```javascript
-<Form initValue={{ arr: ['a', 'b'] }}>
-  <ArrayField name="arr">{({ index }) => <Input name={index} />}</ArrayField>
+<Form initValue={{ arr1: ['a', 'b'], arr2: [{text: 'foo'}, {text: 'bar'}}] }}>
+  <div>arr1</div>
+  <ArrayField name="arr1">
+    {() => <Input />}  // you can get item value in arr1 without name prop, because context has been transformed to each item
+  </ArrayField>
+  <div>arr2</div>
+  <ArrayField name="arr2">
+    {() => <Input name="text"/>} // you can get item properties of arr2 by name prop, because context has been transformed to each item
+  </ArrayField>
 </Form>
 
 /*
 render as
 <form>
-  <input name="a" value="a"/>
-  <input name="b" value="b"/>
+  <div>arr1</div>
+  <input value="a"/>
+  <input value="b"/>
+  <div>arr2</div>
+  <input name="text" value="foo"/>
+  <input name="text" value="bar"/>
 </form>
 */
 ```
