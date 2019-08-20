@@ -2,7 +2,7 @@ import React from 'react'
 import Form from '../Form'
 import FormItem from './FormItem'
 import Input from './Input'
-import { render, fireEvent, cleanup } from 'react-testing-library'
+import { render, fireEvent, cleanup } from '@testing-library/react'
 import ArrayField from './ArrayField'
 
 afterEach(cleanup)
