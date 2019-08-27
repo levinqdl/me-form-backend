@@ -12,7 +12,6 @@ import { fromJS, isImmutable, mergeDeep, setIn, isList } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
-import Init from './Initializer'
 
 export type Value = {
   [key: string]: any
@@ -48,19 +47,6 @@ type State = ContextValue & {
 }
 
 class Form extends React.Component<Props, State> {
-  initializerQueue: Array<Initializer> = []
-  initialize = () => {
-    const { value } = this.state
-    let nextValue = null
-    while (this.initializerQueue.length) {
-      const initializer = this.initializerQueue.shift()
-      const [scope, v] = initializer()
-      nextValue = setIn(nextValue || value, scope, v)
-    }
-    if (nextValue) {
-      this.commit(nextValue)
-    }
-  }
   isControlled() {
     return 'value' in this.props
   }
@@ -99,9 +85,15 @@ class Form extends React.Component<Props, State> {
     return error
   }
   items: Map<string, Validatable> = new Map()
-  enqueueInitializer = (initializer: Initializer) => {
+  setInitValue = (initializer: Initializer) => {
     if (initializer) {
-      this.initializerQueue.push(initializer)
+      const { value } = this.state
+      let nextValue = null
+      const [scope, v] = initializer()
+      nextValue = setIn(nextValue || value, scope, v)
+      if (nextValue) {
+        this.commit(nextValue)
+      }
     }
   }
   register = (name: string, item: Validatable) => {
@@ -123,7 +115,7 @@ class Form extends React.Component<Props, State> {
     scope: [],
     onChange: this.onChange,
     register: this.register,
-    enqueueInitializer: this.enqueueInitializer,
+    setInitValue: this.setInitValue,
     resetError: this.resetError,
     error: null,
     errorMessages: this.props.errorMessages,
@@ -152,24 +144,28 @@ class Form extends React.Component<Props, State> {
     const { children, formTag, errorMessages } = this.props
     const { error, ...contextValue } = this.state
     const { value } = contextValue
-    const content =
-      typeof children === 'function'
-        ? children({
+    return (
+      <Context.Provider value={contextValue}>
+        {formTag ? (
+          <form onSubmit={this.submitEventHandler}>
+            {typeof children === 'function'
+              ? children({
+                  submit: this.submit,
+                  error: parseErrorMessage(error, errorMessages),
+                  data: isImmutable(value) ? value.toJS() : value,
+                })
+              : children}
+          </form>
+        ) : typeof children === 'function' ? (
+          children({
             submit: this.submit,
             error: parseErrorMessage(error, errorMessages),
             data: isImmutable(value) ? value.toJS() : value,
           })
-        : children
-    return (
-      <Init initialize={this.initialize}>
-        <Context.Provider value={contextValue}>
-          {formTag ? (
-            <form onSubmit={this.submitEventHandler}>{content}</form>
-          ) : (
-            content
-          )}
-        </Context.Provider>
-      </Init>
+        ) : (
+          children
+        )}
+      </Context.Provider>
     )
   }
 }

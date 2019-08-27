@@ -637,13 +637,21 @@ describe('change whole value', () => {
     expect(getByLabelText('zero')).toHaveAttribute('value', 'a')
   })
   test('init value', () => {
-    const { getByLabelText } = render(
-      <Form initValue={{ a: 'a' }}>
-        <Input name="a" label="a" initValue="c" />
-        <Input name="b" label="b" initValue="b" />
+    const fn = jest.fn()
+    const { getByLabelText, getByText } = render(
+      <Form initValue={{ a: 'a' }} onSubmit={fn}>
+        {({ submit }) => (
+          <>
+            <Input name="a" label="a" initValue="c" />
+            <Input name="b" label="b" initValue="b" />
+            <button onClick={submit}>submit</button>
+          </>
+        )}
       </Form>,
     )
     expect(getByLabelText('a')).toHaveAttribute('value', 'a')
     expect(getByLabelText('b')).toHaveAttribute('value', 'b')
+    fireEvent.click(getByText('submit'))
+    expect(fn).toHaveBeenLastCalledWith({ a: 'a', b: 'b' })
   })
 })
