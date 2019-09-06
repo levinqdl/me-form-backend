@@ -5,6 +5,7 @@ const NativeInput: ComponentType<{
   label?: string
   value: string
   onChange: (e: ChangeEvent<HTMLInputElement>) => void
+  onFocus?: () => void
 }> = ({ label, id, ...props }) => (
   <label htmlFor={id}>
     {label}

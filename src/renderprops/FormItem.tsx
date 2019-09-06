@@ -2,13 +2,7 @@ import { is, isImmutable, fromJS, setIn } from 'immutable'
 import React, { ComponentType, ReactNode } from 'react'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
-import {
-  FormItemProps,
-  ValidatorResult,
-  Key,
-  DidUpdate,
-  Initializer,
-} from '../types'
+import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
 import { appendScope, warnInterceptor, getNextValue } from '../utils'
 import * as validators from '../utils/validators'
 
@@ -134,7 +128,13 @@ class FormItem extends React.Component<P, State> {
   }
   renderChildren = () => {
     warnInterceptor(this.props)
-    const { children, target, format = (s: any) => s, scope } = this.props
+    const {
+      children,
+      target,
+      format = (s: any) => s,
+      scope,
+      resetError,
+    } = this.props
 
     return typeof children === 'function'
       ? children({
@@ -142,6 +142,7 @@ class FormItem extends React.Component<P, State> {
           onChange: this.handleChange,
           error: this.getError(),
           id: scope.join('.'),
+          resetError,
         })
       : children
   }
@@ -165,7 +166,7 @@ class FormItem extends React.Component<P, State> {
           enqueueInitializer,
         }}
       >
-        <span onFocus={resetError}>{this.renderChildren()}</span>
+        {this.renderChildren()}
       </Context.Provider>
     )
   }

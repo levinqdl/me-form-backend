@@ -9,7 +9,7 @@ const Input = ({
   ...formProps
 }: FormProps<typeof NativeInput>) => (
   <FormItem {...formProps} name={name} label={label}>
-    {({ value, onChange, error, id }: any) => (
+    {({ value, onChange, error, id, resetError }: any) => (
       <>
         <NativeInput
           id={id}
@@ -18,6 +18,7 @@ const Input = ({
             onChange(value)
           }}
           label={label}
+          onFocus={resetError}
         />
         {error && <span>{error.message}</span>}
       </>
