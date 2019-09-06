@@ -32,7 +32,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
     register,
     resetError,
     errorMessages,
-    setInitValue,
+    enqueueInitializer,
   } = useContext(Context)
   const computedScope =
     name !== undefined && name !== '' ? [...scope, name] : scope
@@ -54,7 +54,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
   const v = value.getIn(computedScope)
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
-      setInitValue(() => [computedScope, initValue])
+      enqueueInitializer(() => [computedScope, initValue])
     }
   }, [name])
   const target = v === void 0 ? fromJS(initValue) : v
@@ -79,7 +79,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
           },
           resetError,
           errorMessages,
-          setInitValue: setInitValue,
+          enqueueInitializer,
         }}
       >
         {children({

@@ -1,4 +1,4 @@
-import { is, isImmutable } from 'immutable'
+import { is, isImmutable, fromJS } from 'immutable'
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
@@ -29,7 +29,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     value,
     onChange,
     register,
-    setInitValue,
+    enqueueInitializer,
     resetError,
     errorMessages: ctxErrorMessages,
     scope,
@@ -61,6 +61,9 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
+    const disabledChanged = () => {
+      return
+    }
     if (
       !is(target, prevTarget.current) ||
       (disabled !== pervDisabled.current && disabled)
@@ -73,7 +76,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   })
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
-      setInitValue(() => [computedScope, initValue])
+      enqueueInitializer(() => [computedScope, initValue])
     }
     return register(name, {
       validate: () => validateRef.current(),

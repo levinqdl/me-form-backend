@@ -13,7 +13,7 @@ export interface ContextValue {
   onChange: (v: any, keyPath: Key[], didUpdate?: DidUpdate) => void
   scope: Key[]
   register: (name: string, formItem: Validatable) => () => void
-  setInitValue: (initializer: Initializer) => void
+  enqueueInitializer: (initializer: Initializer) => void
   resetError: () => void
   errorMessages: ErrorMessages
 }
@@ -23,7 +23,7 @@ const Context = createContext<ContextValue>({
   scope: [],
   onChange: () => {},
   register: (item, name) => () => {},
-  setInitValue: () => {},
+  enqueueInitializer: () => {},
   resetError: () => {},
   errorMessages: {},
 })

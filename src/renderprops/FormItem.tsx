@@ -146,7 +146,13 @@ class FormItem extends React.Component<P, State> {
       : children
   }
   render() {
-    const { value, resetError, errorMessages, scope, setInitValue } = this.props
+    const {
+      value,
+      resetError,
+      errorMessages,
+      scope,
+      enqueueInitializer,
+    } = this.props
     return (
       <Context.Provider
         value={{
@@ -156,7 +162,7 @@ class FormItem extends React.Component<P, State> {
           register: this.register,
           resetError: this.resetError,
           errorMessages,
-          setInitValue: setInitValue,
+          enqueueInitializer,
         }}
       >
         <span onFocus={resetError}>{this.renderChildren()}</span>
