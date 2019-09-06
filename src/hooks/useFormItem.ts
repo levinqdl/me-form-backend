@@ -1,5 +1,5 @@
 import { is, isImmutable, fromJS } from 'immutable'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState, useLayoutEffect } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
@@ -61,9 +61,6 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
-    const disabledChanged = () => {
-      return
-    }
     if (
       !is(target, prevTarget.current) ||
       (disabled !== pervDisabled.current && disabled)
@@ -82,7 +79,6 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
       validate: () => validateRef.current(),
     })
   }, [name])
-
   const parseError = () => {
     if (error) {
       const message = parseErrorMessage(error, {

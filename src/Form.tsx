@@ -8,11 +8,10 @@ import {
   Initializer,
 } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS, isImmutable, mergeDeep, setIn, isList } from 'immutable'
+import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
-import Init from './Initializer'
 
 export type Value = {
   [key: string]: any
@@ -99,9 +98,17 @@ class Form extends React.Component<Props, State> {
     return error
   }
   items: Map<string, Validatable> = new Map()
+  initTimer: number
   enqueueInitializer = (initializer: Initializer) => {
     if (initializer) {
       this.initializerQueue.push(initializer)
+      if (this.initTimer) {
+        clearTimeout(this.initTimer)
+      }
+      this.initTimer = setTimeout(() => {
+        this.initialize()
+        this.initTimer = null
+      })
     }
   }
   register = (name: string, item: Validatable) => {
@@ -161,15 +168,13 @@ class Form extends React.Component<Props, State> {
           })
         : children
     return (
-      <Init initialize={this.initialize}>
-        <Context.Provider value={contextValue}>
-          {formTag ? (
-            <form onSubmit={this.submitEventHandler}>{content}</form>
-          ) : (
-            content
-          )}
-        </Context.Provider>
-      </Init>
+      <Context.Provider value={contextValue}>
+        {formTag ? (
+          <form onSubmit={this.submitEventHandler}>{content}</form>
+        ) : (
+          content
+        )}
+      </Context.Provider>
     )
   }
 }

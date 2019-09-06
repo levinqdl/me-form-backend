@@ -1,4 +1,4 @@
-import React, { RefObject, useState } from 'react'
+import React, { RefObject, useState, useEffect } from 'react'
 import { act } from 'react-dom/test-utils'
 import {
   cleanup,
@@ -645,5 +645,34 @@ describe('change whole value', () => {
     )
     expect(getByLabelText('a')).toHaveAttribute('value', 'a')
     expect(getByLabelText('b')).toHaveAttribute('value', 'b')
+  })
+  test('init value with self rerendered children', async () => {
+    const fn = jest.fn()
+    const Child = () => {
+      const [show, setShow] = useState(false)
+      useEffect(() => {
+        setTimeout(() => setShow(true))
+      })
+      return show && <Input name="b" label="b" initValue="b" />
+    }
+    const Container = () => {
+      return (
+        <Form initValue={{ a: 'a' }} onSubmit={fn}>
+          {({ submit }) => (
+            <>
+              <Input name="a" label="a" initValue="c" />
+              <Child />
+              <button onClick={submit}>submit</button>
+            </>
+          )}
+        </Form>
+      )
+    }
+    const { getByLabelText, getByText } = render(<Container />)
+    expect(getByLabelText('a')).toHaveAttribute('value', 'a')
+    const b = await waitForElement(() => getByLabelText('b'))
+    expect(b).toHaveAttribute('value', 'b')
+    fireEvent.click(getByText('submit'))
+    expect(fn).lastCalledWith({ a: 'a', b: 'b' })
   })
 })
