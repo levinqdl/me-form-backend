@@ -92,7 +92,7 @@ class FormItem extends React.Component<P, State> {
   resetError = () => {
     this.setState({ error: null })
   }
-  diffScope = (current: Key[], child: Key[]) => {
+  diffScope = (current: Key[], child: Key[] = []) => {
     let i = 0
     while (i < current.length && current[i] === child[i]) {
       i++
@@ -113,11 +113,8 @@ class FormItem extends React.Component<P, State> {
       scope: currentScope,
       didUpdate: currentDidUpdate,
     } = this.props
-    let nextValue = v
-    if (childScope) {
-      const diffScope = this.diffScope(currentScope, childScope)
-      nextValue = getNextValue(target, v, diffScope, didUpdate)
-    }
+    const diffScope = this.diffScope(currentScope, childScope)
+    let nextValue = getNextValue(target, v, diffScope, didUpdate)
     if (parse || interceptor) {
       const parser = parse || interceptor || (s => s)
       nextValue = fromJS(

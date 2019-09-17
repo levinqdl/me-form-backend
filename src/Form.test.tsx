@@ -53,6 +53,34 @@ describe.each([
       const zero = getByLabelText('zero')
       expect(zero).toHaveAttribute('value', 'zero')
     })
+    test('change value is not primary type', () => {
+      const Container = () => (
+        <Form initValue={{ data: [] }}>
+          <FormItem name="data">
+            {({ onChange, value }) => (
+              <>
+                <ArrayField>
+                  {({ remove, index }) => (
+                    <div key={index}>
+                      <span>index {index}</span>
+                      <button onClick={remove}>remove</button>
+                    </div>
+                  )}
+                </ArrayField>{' '}
+                <button onClick={() => onChange([...value, { x: 'x' }])}>
+                  Add
+                </button>
+              </>
+            )}
+          </FormItem>
+        </Form>
+      )
+      const { getByText, queryByText } = render(<Container />)
+      fireEvent.click(getByText('Add'))
+      getByText('index 0')
+      fireEvent.click(getByText('remove'))
+      expect(queryByText('index 0')).toBeNull()
+    })
     test('validator triggered after touched', () => {
       const { getByLabelText, queryByText, getByText } = render(
         <Form initValue={{ f1: '' }}>
