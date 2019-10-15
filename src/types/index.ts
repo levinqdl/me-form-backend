@@ -24,7 +24,11 @@ export interface ErrorMessages {
 
 export type Patch = (payload: Partial<Value>, removeKey?: string) => void
 
-export type DidUpdate = (changeValue: any, patch: Patch) => void
+export type DidUpdate = (
+  changeValue: any,
+  patch: Patch,
+  formData: Value,
+) => void
 
 export type FormItemProps<V = any> = {
   name?: string
@@ -39,6 +43,7 @@ export type FormItemProps<V = any> = {
   errorMessages?: ErrorMessages
   initValue?: V
   disabled?: boolean
+  onValueChange?: () => void
 }
 
 type GetPropsFromReactElement<E> = E extends ReactElement<infer P> ? P : never

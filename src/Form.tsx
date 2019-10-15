@@ -81,7 +81,7 @@ class Form extends React.Component<Props, State> {
       this.setState({ value: nextValue })
     }
   }
-  onChange = (value: any, keyPath: Key[] = [], didUpdate: DidUpdate) => {
+  onChange = (value: any, keyPath: Key[] = [], didUpdate?: DidUpdate) => {
     const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
     this.commit(nextValue)
   }
@@ -92,8 +92,8 @@ class Form extends React.Component<Props, State> {
     }
     const { validator } = this.props
     if (!error && validator) {
-      error = validator(this.state.value.toJS())
-      this.setState({ error })
+      error = validator(this.state.value.toJS()) || null
+      if (error || this.state.error !== null) this.setState({ error })
     }
     return error
   }
@@ -129,6 +129,7 @@ class Form extends React.Component<Props, State> {
     value: this.getValue(),
     scope: [],
     onChange: this.onChange,
+    setValue: this.onChange,
     register: this.register,
     enqueueInitializer: this.enqueueInitializer,
     resetError: this.resetError,

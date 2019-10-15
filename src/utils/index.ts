@@ -28,8 +28,9 @@ export const getNextValue = (
     keyPath.length === 0 ? fromJS(value) : setIn(state, keyPath, value)
   const ref = { nextValue }
   if (didUpdate) {
-    keyPath.pop()
-    didUpdate(value, patch(nextValue, keyPath, ref))
+    const copy = [...keyPath]
+    copy.pop()
+    didUpdate(value, patch(nextValue, copy, ref), state.toJS())
   }
   return ref.nextValue
 }

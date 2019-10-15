@@ -146,10 +146,10 @@ class FormItem extends React.Component<P, State> {
   render() {
     const {
       value,
-      resetError,
       errorMessages,
       scope,
       enqueueInitializer,
+      setValue,
     } = this.props
     return (
       <Context.Provider
@@ -159,6 +159,7 @@ class FormItem extends React.Component<P, State> {
           onChange: this.handleChange,
           register: this.register,
           resetError: this.resetError,
+          setValue,
           errorMessages,
           enqueueInitializer,
         }}

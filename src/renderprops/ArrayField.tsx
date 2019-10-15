@@ -33,6 +33,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
     resetError,
     errorMessages,
     enqueueInitializer,
+    setValue,
   } = useContext(Context)
   const computedScope =
     name !== undefined && name !== '' ? [...scope, name] : scope
@@ -69,6 +70,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
             : value,
           scope: [...computedScope, index],
           onChange,
+          setValue,
           register: (name: string, item: Validatable) => {
             const map =
               items.current[index] || (items.current[index] = new Map())

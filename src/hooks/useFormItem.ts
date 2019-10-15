@@ -1,5 +1,13 @@
 import { is, isImmutable, fromJS } from 'immutable'
-import { useContext, useEffect, useRef, useState, useLayoutEffect } from 'react'
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+} from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
@@ -22,6 +30,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     parse,
     initValue,
     disabled,
+    onValueChange,
     ...rest
   } = props
   const parser = parse || interceptor || (v => v)
@@ -35,7 +44,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     scope,
   } = useContext(Context)
   const [error, setError] = useState(null)
-  const computedScope = appendScope(scope, name)
+  const computedScope = useMemo(() => appendScope(scope, name), [scope, name])
   const v = value.getIn(computedScope)
   const target = v === void 0 ? initValue : v
 
@@ -45,7 +54,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     let error = null
     if (!disabled) {
       if (validator) {
-        error = validator(target)
+        error = validator(isImmutable(target) ? target.toJS() : target)
       } else if (required && !validators.required(target)) {
         error = { rule: 'required', labels: [label] }
       } else if (minLength) {
@@ -61,10 +70,11 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
-    if (
-      !is(target, prevTarget.current) ||
-      (disabled !== pervDisabled.current && disabled)
-    ) {
+    const changed = !is(target, prevTarget.current)
+    if (prevTarget.current && changed && onValueChange) {
+      setTimeout(onValueChange)
+    }
+    if (changed || (disabled !== pervDisabled.current && disabled)) {
       prevTarget.current = target
       validate()
     }
@@ -92,12 +102,16 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     }
     return null
   }
+  const memoOnChange = useCallback(
+    (v: any) => {
+      onChange(parser(v), computedScope, didUpdate)
+    },
+    [computedScope],
+  )
   return {
     rest,
     value: format(isImmutable(target) ? target.toJS() : target),
-    onChange: (v: any) => {
-      onChange(parser(v), computedScope, didUpdate)
-    },
+    onChange: memoOnChange,
     error: parseError(),
     resetError,
     label,

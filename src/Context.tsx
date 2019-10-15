@@ -10,7 +10,8 @@ import {
 
 export interface ContextValue {
   value: Value
-  onChange: (v: any, keyPath: Key[], didUpdate?: DidUpdate) => void
+  onChange: (v: any, keyPath?: Key[], didUpdate?: DidUpdate) => void
+  setValue: (v: any) => void
   scope: Key[]
   register: (name: string, formItem: Validatable) => () => void
   enqueueInitializer: (initializer: Initializer) => void
@@ -22,6 +23,7 @@ const Context = createContext<ContextValue>({
   value: {},
   scope: [],
   onChange: () => {},
+  setValue: () => {},
   register: (item, name) => () => {},
   enqueueInitializer: () => {},
   resetError: () => {},
