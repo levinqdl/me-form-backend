@@ -179,6 +179,29 @@ describe.each([
       rerender(<Contianer disabled />)
       expect(queryByText('f1 required')).toBeNull()
     })
+    test('validator on submit', () => {
+      const submitValidator = jest.fn()
+      const itemValidator = jest.fn()
+      const Container = () => {
+        return (
+          <Form initValue={{}} validator={submitValidator}>
+            {({ submit }) => (
+              <>
+                <Input name="a" label="a" validator={itemValidator} />
+                <button onClick={submit}>submit</button>
+              </>
+            )}
+          </Form>
+        )
+      }
+      const { getByLabelText, getByText } = render(<Container />)
+      fireEvent.change(getByLabelText('a'), { target: { value: 'xxx' } })
+      expect(submitValidator).not.toHaveBeenCalled()
+      expect(itemValidator).toHaveBeenLastCalledWith('xxx', false)
+      fireEvent.click(getByText('submit'))
+      expect(submitValidator).toHaveBeenLastCalledWith({ a: 'xxx' })
+      expect(itemValidator).toHaveBeenLastCalledWith('xxx', true)
+    })
     test('renderprop children: submit, data, error', () => {
       const handleSubmit = jest.fn()
       const { getByLabelText, getByText, queryByText } = render(

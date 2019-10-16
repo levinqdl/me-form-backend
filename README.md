@@ -80,18 +80,18 @@ useFormItem is a React custom hook. It connects a form control component with Fo
 
 Usualy we just pass all props to useFormItem hook as input is just fine, useFormItem forwards all unknown props, but you may want to control it, all used props listed below:
 
-| property      | description                                                                                                                      |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| name          | string for field name                                                                                                            |
-| validator     | callback whenever field value changes, return null as no error, or an error descriptor                                           |
-| errorMessages | an object, which keys are validator rules and values are corresponding error messages                                            |
-| requied       | bool, shorthand for required validator                                                                                           |
-| minLength     | number, shorthand for min length validator                                                                                       |
-| label         | ReactNode, it will be passed to dynamic error message function                                                                   |
-| parse         | a function called when field value changes, receive changed value, can be used like trim input or parse date from string         |
-| format        | a function called when pass value to control component, receive current value, can be used when format date to string            |
-| interceptor   | [Deprecated] use `parse` instead. A function called when field value changes, receive changed value, can be used like trim input |
-| didUpdate     | a callback that called when a field is confirmed to change, receive changed value and a patch fucntion                           |
+| property      | description                                                                                                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name          | string for field name                                                                                                                                                               |
+| validator     | callback whenever field value changes, return null as no error, or an error descriptor, besides field value, if second argument is true, it means the validator is called by submit |
+| errorMessages | an object, which keys are validator rules and values are corresponding error messages                                                                                               |
+| requied       | bool, shorthand for required validator                                                                                                                                              |
+| minLength     | number, shorthand for min length validator                                                                                                                                          |
+| label         | ReactNode, it will be passed to dynamic error message function                                                                                                                      |
+| parse         | a function called when field value changes, receive changed value, can be used like trim input or parse date from string                                                            |
+| format        | a function called when pass value to control component, receive current value, can be used when format date to string                                                               |
+| interceptor   | [Deprecated] use `parse` instead. A function called when field value changes, receive changed value, can be used like trim input                                                    |
+| didUpdate     | a callback that called when a field is confirmed to change, receive changed value and a patch fucntion                                                                              |
 
 #### didUpdate v.s. interceptor
 

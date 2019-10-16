@@ -50,11 +50,14 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
 
   const prevTarget = useRef(target)
   const pervDisabled = useRef(disabled)
-  const validate = () => {
+  const validate = (submitting = false) => {
     let error = null
     if (!disabled) {
       if (validator) {
-        error = validator(isImmutable(target) ? target.toJS() : target)
+        error = validator(
+          isImmutable(target) ? target.toJS() : target,
+          submitting,
+        )
       } else if (required && !validators.required(target)) {
         error = { rule: 'required', labels: [label] }
       } else if (minLength) {
@@ -86,7 +89,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
       enqueueInitializer(() => [computedScope, initValue])
     }
     return register(name, {
-      validate: () => validateRef.current(),
+      validate: () => validateRef.current(true),
     })
   }, [name])
   const parseError = () => {

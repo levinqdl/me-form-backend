@@ -19,7 +19,7 @@ class FormItem extends React.Component<P, State> {
       error: null,
     }
   }
-  validate = (isSubmit?: boolean) => {
+  validate = (isSubmit: boolean = false) => {
     let childrenError: ValidatorResult = null
     if (isSubmit) {
       for (const item of this.items.values()) {
@@ -31,7 +31,10 @@ class FormItem extends React.Component<P, State> {
     let error = null
     if (!disabled) {
       if (validator) {
-        error = validator(isImmutable(target) ? target.toJS() : target)
+        error = validator(
+          isImmutable(target) ? target.toJS() : target,
+          isSubmit,
+        )
       }
     }
     this.setState({ error })

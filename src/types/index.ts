@@ -35,7 +35,7 @@ export type FormItemProps<V = any> = {
   label?: string
   required?: boolean
   minLength?: number
-  validator?: (value: any) => ValidatorResult
+  validator?: (value: any, submitting: boolean) => ValidatorResult
   interceptor?: (value: V) => V
   parse?: (value: V) => V
   format?: (value: V) => V
