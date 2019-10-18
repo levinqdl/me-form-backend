@@ -89,7 +89,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
       enqueueInitializer(() => [computedScope, initValue])
     }
     return register(name, {
-      validate: () => validateRef.current(true),
+      validate: submitting => validateRef.current(submitting),
     })
   }, [name])
   const parseError = () => {

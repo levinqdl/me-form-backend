@@ -1,4 +1,4 @@
-import React, { RefObject, useState, useEffect } from 'react'
+import React, { RefObject, useState, useEffect, useRef } from 'react'
 import { act } from 'react-dom/test-utils'
 import {
   cleanup,
@@ -183,24 +183,49 @@ describe.each([
       const submitValidator = jest.fn()
       const itemValidator = jest.fn()
       const Container = () => {
+        const form = useRef(null)
         return (
-          <Form initValue={{}} validator={submitValidator}>
+          <Form ref={form} initValue={{}} validator={submitValidator}>
             {({ submit }) => (
               <>
                 <Input name="a" label="a" validator={itemValidator} />
                 <button onClick={submit}>submit</button>
+                <button onClick={() => form.current.validate()}>
+                  validate
+                </button>
+                <button onClick={() => form.current.validate(true)}>
+                  validate all
+                </button>
               </>
             )}
           </Form>
         )
       }
       const { getByLabelText, getByText } = render(<Container />)
+
       fireEvent.change(getByLabelText('a'), { target: { value: 'xxx' } })
       expect(submitValidator).not.toHaveBeenCalled()
       expect(itemValidator).toHaveBeenLastCalledWith('xxx', false)
+      submitValidator.mockClear()
+      itemValidator.mockClear()
+
       fireEvent.click(getByText('submit'))
       expect(submitValidator).toHaveBeenLastCalledWith({ a: 'xxx' })
       expect(itemValidator).toHaveBeenLastCalledWith('xxx', true)
+      submitValidator.mockClear()
+      itemValidator.mockClear()
+
+      fireEvent.click(getByText('validate'))
+      expect(submitValidator).not.toHaveBeenCalled()
+      expect(itemValidator).toHaveBeenLastCalledWith('xxx', false)
+      submitValidator.mockClear()
+      itemValidator.mockClear()
+
+      fireEvent.click(getByText('validate all'))
+      expect(submitValidator).toHaveBeenLastCalledWith({ a: 'xxx' })
+      expect(itemValidator).toHaveBeenLastCalledWith('xxx', true)
+      submitValidator.mockClear()
+      itemValidator.mockClear()
     })
     test('renderprop children: submit, data, error', () => {
       const handleSubmit = jest.fn()

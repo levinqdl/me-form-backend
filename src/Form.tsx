@@ -69,7 +69,7 @@ class Form extends React.Component<Props, State> {
   }
   submit = () => {
     const { onSubmit } = this.props
-    if (!this.validate() && onSubmit) {
+    if (!this.validate(true) && onSubmit) {
       onSubmit(this.state.value.toJS())
     }
   }
@@ -85,13 +85,13 @@ class Form extends React.Component<Props, State> {
     const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
     this.commit(nextValue)
   }
-  validate = () => {
+  validate = (submitting = false) => {
     let error = null
     for (const item of this.items.values()) {
-      error = item.validate(true) || error
+      error = item.validate(submitting) || error
     }
     const { validator } = this.props
-    if (!error && validator) {
+    if (!error && validator && submitting) {
       error = validator(this.state.value.toJS()) || null
       if (error || this.state.error !== null) this.setState({ error })
     }

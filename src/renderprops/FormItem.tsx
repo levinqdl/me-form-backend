@@ -21,10 +21,8 @@ class FormItem extends React.Component<P, State> {
   }
   validate = (isSubmit: boolean = false) => {
     let childrenError: ValidatorResult = null
-    if (isSubmit) {
-      for (const item of this.items.values()) {
-        childrenError = item.validate(isSubmit) || childrenError
-      }
+    for (const item of this.items.values()) {
+      childrenError = item.validate(isSubmit) || childrenError
     }
     const { target, disabled } = this.props
     const validator = this.getValidator()
