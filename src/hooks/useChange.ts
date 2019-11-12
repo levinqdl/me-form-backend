@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import Context from '../Context'
-import { mergeDeep, fromJS } from 'immutable'
+import { fromJS } from 'immutable'
 
 const useChange = () => {
   const { value, setValue } = useContext(Context)

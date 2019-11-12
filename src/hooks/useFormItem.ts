@@ -1,10 +1,9 @@
-import { is, isImmutable, fromJS } from 'immutable'
+import { is, isImmutable } from 'immutable'
 import {
   useContext,
   useEffect,
   useRef,
   useState,
-  useLayoutEffect,
   useCallback,
   useMemo,
 } from 'react'

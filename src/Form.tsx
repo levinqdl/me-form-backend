@@ -12,6 +12,7 @@ import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
+import warning = require('warning')
 
 export type Value = {
   [key: string]: any
@@ -112,6 +113,11 @@ class Form extends React.Component<Props, State> {
     }
   }
   register = (name: string, item: Validatable) => {
+    const exists = this.items.has(name)
+    warning(
+      !exists,
+      `"${name}" has been registered on this form, it should be registerd only once`,
+    )
     this.items.set(name, item)
     return () => {
       this.items.delete(name)

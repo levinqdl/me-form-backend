@@ -5,6 +5,7 @@ import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
 import { appendScope, warnInterceptor, getNextValue } from '../utils'
 import * as validators from '../utils/validators'
+import warning = require('warning')
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 
@@ -85,6 +86,11 @@ class FormItem extends React.Component<P, State> {
   }
   items: Map<string, FormItem> = new Map()
   register = (name: string, item: FormItem) => {
+    const exists = this.items.has(name)
+    warning(
+      !exists,
+      `"${name}" has been registered on this FormItem[name="${this.props.name}"], it should be registerd only once`,
+    )
     this.items.set(name, item)
     return () => {
       this.items.delete(name)
