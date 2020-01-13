@@ -5,7 +5,7 @@ import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
 import { appendScope, warnInterceptor, getNextValue } from '../utils'
 import * as validators from '../utils/validators'
-import warning = require('warning')
+import warning from 'warning'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 

@@ -12,7 +12,7 @@ import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
-import warning = require('warning')
+import warning from 'warning'
 
 export type Value = {
   [key: string]: any
