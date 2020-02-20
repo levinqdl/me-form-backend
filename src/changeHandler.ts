@@ -1,4 +1,4 @@
-import { set, isImmutable } from 'immutable'
+import { set } from 'lodash-es'
 
 export default (
   value: any,
@@ -7,9 +7,5 @@ export default (
   interceptor: (v: any) => any = v => v,
 ) => (input: any) => {
   const v = interceptor(input)
-  onChange(
-    isImmutable(value) && (name !== undefined && name !== '')
-      ? set(value, name, v)
-      : v,
-  )
+  onChange(name !== undefined && name !== '' ? set(value, name, v) : v)
 }

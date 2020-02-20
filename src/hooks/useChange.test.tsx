@@ -18,18 +18,18 @@ describe('useChange', () => {
         {({ data: { a, b } }) => {
           return (
             <div>
-              <span data-testId="a">{a}</span>
-              <span data-testId="b">{b}</span>
+              <span title="a">{a}</span>
+              <span title="b">{b}</span>
               <Control />
             </div>
           )
         }}
       </Form>
     )
-    const { getByTestId, getByText } = render(<Container />)
+    const { getByTitle, getByText } = render(<Container />)
     fireEvent.click(getByText('change'))
-    expect(getByTestId('b')).toHaveTextContent('b changed')
-    expect(getByTestId('a')).toHaveTextContent('a changed')
+    expect(getByTitle('b')).toHaveTextContent('b changed')
+    expect(getByTitle('a')).toHaveTextContent('a changed')
   })
   test('change by updater', () => {
     const Control = () => {
@@ -47,17 +47,17 @@ describe('useChange', () => {
         {({ data: { a, b } }) => {
           return (
             <div>
-              <span data-testId="a">{a}</span>
-              <span data-testId="b">{b}</span>
+              <span title="a">{a}</span>
+              <span title="b">{b}</span>
               <Control />
             </div>
           )
         }}
       </Form>
     )
-    const { getByTestId, getByText } = render(<Container />)
+    const { getByTitle, getByText } = render(<Container />)
     fireEvent.click(getByText('change'))
-    expect(getByTestId('b')).toHaveTextContent('30')
-    expect(getByTestId('a')).toHaveTextContent('11')
+    expect(getByTitle('b')).toHaveTextContent('30')
+    expect(getByTitle('a')).toHaveTextContent('11')
   })
 })

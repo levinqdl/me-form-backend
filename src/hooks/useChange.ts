@@ -1,6 +1,5 @@
 import { useContext, useRef, useEffect, useCallback } from 'react'
 import Context from '../Context'
-import { fromJS } from 'immutable'
 
 const useChange = () => {
   const { value, setValue } = useContext(Context)
@@ -10,9 +9,9 @@ const useChange = () => {
   })
   const callback = useCallback((payload: Object) => {
     if (typeof payload === 'function') {
-      payload = payload(ref.current.toJS())
+      payload = payload(ref.current)
     }
-    setValue(fromJS(payload))
+    setValue(payload)
   }, [])
   return callback
 }

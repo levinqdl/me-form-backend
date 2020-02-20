@@ -19,7 +19,7 @@ const errorMessages = { required: 'f1 is required' }
 
 describe.each([
   ['render props', require('./renderprops/Input').default],
-  ['hooks', require('./hooks/Input').default],
+  // ['hooks', require('./hooks/Input').default],
 ])('Form', (name, Input) => {
   describe(`Form with ${name}`, () => {
     it('renders children', () => {

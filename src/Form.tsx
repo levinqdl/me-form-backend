@@ -8,11 +8,11 @@ import {
   Initializer,
 } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
 import warning from 'warning'
+import { merge, set } from 'lodash-es'
 
 export type Value = {
   [key: string]: any
@@ -55,7 +55,7 @@ class Form extends React.Component<Props, State> {
     while (this.initializerQueue.length) {
       const initializer = this.initializerQueue.shift()
       const [scope, v] = initializer()
-      nextValue = setIn(nextValue || value, scope, v)
+      nextValue = set(nextValue || value, scope, v)
     }
     if (nextValue) {
       this.commit(nextValue)
@@ -71,13 +71,13 @@ class Form extends React.Component<Props, State> {
   submit = () => {
     const { onSubmit } = this.props
     if (!this.validate(true) && onSubmit) {
-      onSubmit(this.state.value.toJS())
+      onSubmit(this.state.value)
     }
   }
   commit = (nextValue: any) => {
     const { onChange } = this.props
     if (onChange) {
-      onChange(nextValue.toJS())
+      onChange(nextValue)
     } else {
       this.setState({ value: nextValue })
     }
@@ -93,7 +93,7 @@ class Form extends React.Component<Props, State> {
     }
     const { validator } = this.props
     if (!error && validator && submitting) {
-      error = validator(this.state.value.toJS()) || null
+      error = validator(this.state.value) || null
       if (error || this.state.error !== null) this.setState({ error })
     }
     return error
@@ -127,9 +127,9 @@ class Form extends React.Component<Props, State> {
     this.setState({ error: null })
   }
   getValue = () => {
-    const { value, defaultValue, initValue } = this.props
+    const { value, initValue, defaultValue } = this.props
     const v = this.isControlled() ? value : initValue
-    return fromJS(defaultValue ? mergeDeep(defaultValue, v) : v)
+    return defaultValue ? merge({}, defaultValue, v) : v
   }
   state: State = {
     value: this.getValue(),
@@ -153,10 +153,11 @@ class Form extends React.Component<Props, State> {
   }
   static getDerivedStateFromProps(props: Props, state: State) {
     if ('value' in props) {
-      const { defaultValue, value } = props
+      const { value, defaultValue } = props
+      const v = defaultValue ? merge({}, defaultValue, value) : value
       return {
         ...state,
-        value: fromJS(defaultValue ? mergeDeep(defaultValue, value) : value),
+        value: v,
       }
     } else {
       return null
@@ -171,7 +172,7 @@ class Form extends React.Component<Props, State> {
         ? children({
             submit: this.submit,
             error: parseErrorMessage(error, errorMessages),
-            data: isImmutable(value) ? value.toJS() : value,
+            data: value,
           })
         : children
     return (

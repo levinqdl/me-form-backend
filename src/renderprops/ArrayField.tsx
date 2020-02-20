@@ -1,8 +1,9 @@
 import React, { ReactNode, useRef, useContext, useEffect } from 'react'
 import Context from '../Context'
-import { isImmutable, fromJS, setIn } from 'immutable'
 import { Validatable } from '../types'
 import { Value } from '../Form'
+import { get, set } from 'lodash-es'
+import produce from 'immer'
 
 const { Provider } = Context
 
@@ -51,22 +52,21 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
       },
     })
   }, [id])
-
-  const v = value.getIn(computedScope)
+  const v = get(value, computedScope, initValue ?? value)
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
       enqueueInitializer(() => [computedScope, initValue])
     }
   }, [name])
-  const target = v === void 0 ? fromJS(initValue) : v
+  const target = v === void 0 ? initValue : v
   return target.map((val: any, index: number) => {
-    const key = getKey ? getKey(isImmutable(val) ? val.toJS() : val) : index
+    const key = getKey ? getKey(val) : index
     return (
       <Provider
         key={key}
         value={{
           value: patchInitValue.current
-            ? setIn(value, computedScope, initValue)
+            ? set(value, computedScope, initValue)
             : value,
           scope: [...computedScope, index],
           onChange,
@@ -86,11 +86,13 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
       >
         {children({
           index,
-          value: isImmutable(val) ? val.toJS() : val,
+          value: val,
           remove: () => {
-            const x = target.delete(index)
+            const nextValue = produce(target, (draft: any[]) => {
+              draft.splice(index, 1)
+            })
             items.current.splice(index, 1)
-            onChange(x, computedScope)
+            onChange(nextValue, computedScope)
           },
         })}
       </Provider>
