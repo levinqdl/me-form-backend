@@ -1,5 +1,4 @@
-import produce from 'immer'
-import { get, merge, set, unset } from 'lodash-es'
+import { get, merge, set, unset, clone } from 'lodash-es'
 import { Key } from 'react'
 import warning from 'warning'
 import { Value } from '../Form'
@@ -32,16 +31,15 @@ export const getNextValue = (
   keyPath: Key[] = [],
   didUpdate: DidUpdate,
 ) => {
-  return produce(state, draft => {
-    const nextValue = keyPath.length === 0 ? value : set(draft, keyPath, value)
-    const ref = { nextValue }
-    if (didUpdate) {
-      const copy = [...keyPath]
-      copy.pop()
-      didUpdate(value, patch(nextValue, copy, ref), state)
-    }
-    return ref.nextValue
-  })
+  const nextValue =
+    keyPath.length === 0 ? value : set(clone(state), keyPath, value)
+  const ref = { nextValue }
+  if (didUpdate) {
+    const copy = [...keyPath]
+    copy.pop()
+    didUpdate(value, patch(nextValue, copy, ref), state)
+  }
+  return ref.nextValue
 }
 
 export const appendScope = (scope: Key[], name: string | number) =>

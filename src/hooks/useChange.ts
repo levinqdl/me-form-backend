@@ -1,6 +1,5 @@
 import { useContext, useRef, useEffect, useCallback } from 'react'
 import Context from '../Context'
-import produce from 'immer'
 
 const useChange = () => {
   const { value, setValue } = useContext(Context)
@@ -11,7 +10,7 @@ const useChange = () => {
   const callback = useCallback((payload: Object) => {
     let next
     if (typeof payload === 'function') {
-      next = produce(ref.current, draft => payload(draft))
+      next = payload(ref.current)
     }
     setValue(next ?? payload)
   }, [])

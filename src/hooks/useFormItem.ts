@@ -75,8 +75,8 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
       setTimeout(onValueChange)
     }
     if (changed || (disabled !== pervDisabled.current && disabled)) {
-      prevTarget.current = target
       validate()
+      prevTarget.current = target
     }
     validateRef.current = validate
     pervDisabled.current = disabled

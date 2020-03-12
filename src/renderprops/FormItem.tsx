@@ -6,6 +6,7 @@ import parseErrorMessage from '../parseErrorMessage'
 import { DidUpdate, FormItemProps, Key, ValidatorResult } from '../types'
 import { appendScope, getNextValue, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
+import { Value } from '../Form'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 
@@ -14,6 +15,9 @@ interface State {
 }
 
 class FormItem extends React.Component<P, State> {
+  static defaultProps = {
+    validatorDeps: (v: Value) => [v],
+  }
   constructor(props: P) {
     super(props)
     this.state = {
@@ -59,11 +63,23 @@ class FormItem extends React.Component<P, State> {
   componentWillUnmount() {
     this.unregister()
   }
+  changed(target: Value, prevTarget: Value) {
+    const { validatorDeps } = this.props
+    const cur = validatorDeps(target)
+    const prev = validatorDeps(prevTarget)
+    if (cur.length !== prev.length) return true
+    for (let i = 0; i < cur.length; i++) {
+      if (cur[i] !== prev[i]) {
+        return true
+      }
+    }
+    return false
+  }
   componentDidUpdate(prevProps: P) {
-    const { target, disabled, scope } = this.props
+    const { target, disabled } = this.props
     if (
-      target !== prevProps.target ||
-      (disabled !== prevProps.disabled && disabled)
+      (disabled !== prevProps.disabled && disabled) ||
+      this.changed(target, prevProps.target)
     ) {
       this.validate()
     }

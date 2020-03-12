@@ -3,7 +3,6 @@ import Context from '../Context'
 import { Validatable } from '../types'
 import { Value } from '../Form'
 import { get, set } from 'lodash-es'
-import produce from 'immer'
 
 const { Provider } = Context
 
@@ -88,11 +87,9 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
           index,
           value: val,
           remove: () => {
-            const nextValue = produce(target, (draft: any[]) => {
-              draft.splice(index, 1)
-            })
+            target.splice(index, 1)
             items.current.splice(index, 1)
-            onChange(nextValue, computedScope)
+            onChange(target, computedScope)
           },
         })}
       </Provider>

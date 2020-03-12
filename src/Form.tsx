@@ -13,7 +13,6 @@ import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
 import warning from 'warning'
 import { merge, set } from 'lodash-es'
-import produce from 'immer'
 
 export type Value = {
   [key: string]: any
@@ -53,13 +52,11 @@ class Form extends React.Component<Props, State> {
   initializerQueue: Array<Initializer> = []
   initialize = () => {
     const { value } = this.state
-    let nextValue = null
+    let nextValue = value
     while (this.initializerQueue.length) {
       const initializer = this.initializerQueue.shift()
       const [scope, v] = initializer()
-      nextValue = produce(nextValue || value, draft => {
-        set(draft, scope, v)
-      })
+      set(nextValue, scope, v)
     }
     if (nextValue) {
       this.commit(nextValue)
@@ -74,7 +71,7 @@ class Form extends React.Component<Props, State> {
   }
   submit = () => {
     const { onSubmit } = this.props
-    if (!this.validate(true) && onSubmit) {
+    if (!this.validate() && onSubmit) {
       onSubmit(this.state.value)
     }
   }
@@ -90,13 +87,13 @@ class Form extends React.Component<Props, State> {
     const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
     this.commit(nextValue)
   }
-  validate = (submitting = false) => {
+  validate = () => {
     let error = null
     for (const item of this.items.values()) {
-      error = item.validate(submitting) || error
+      error = item.validate(true) || error
     }
     const { validator } = this.props
-    if (!error && validator && submitting) {
+    if (!error && validator) {
       error = validator(this.state.value) || null
       if (error || this.state.error !== null) this.setState({ error })
     }
