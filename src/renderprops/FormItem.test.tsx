@@ -38,7 +38,10 @@ describe('multi-layer form', () => {
       <Form
         initValue={{
           a: ['f1', 'f2'],
-          b: [{ id: 'x', name: 'f3' }, { id: 'y', name: 'f4' }],
+          b: [
+            { id: 'x', name: 'f3' },
+            { id: 'y', name: 'f4' },
+          ],
         }}
       >
         {() => (
@@ -91,11 +94,11 @@ describe('multi-layer form', () => {
           <>
             <FormItem
               name="a"
-              validator={({ b, c }) =>
-                b !== c
+              validator={({ b, c }) => {
+                return b !== c
                   ? { rule: 'equal', message: 'b and c should be equal' }
                   : null
-              }
+              }}
             >
               {({ error }) => (
                 <>

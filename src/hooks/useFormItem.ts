@@ -1,4 +1,3 @@
-import { is, isImmutable } from 'immutable'
 import {
   useContext,
   useEffect,
@@ -12,6 +11,7 @@ import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
 import { appendScope, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
+import { get } from 'lodash-es'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = props => {
@@ -44,19 +44,17 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   } = useContext(Context)
   const [error, setError] = useState(null)
   const computedScope = useMemo(() => appendScope(scope, name), [scope, name])
-  const v = value.getIn(computedScope)
+  const v = get(value, computedScope)
   const target = v === void 0 ? initValue : v
 
   const prevTarget = useRef(target)
   const pervDisabled = useRef(disabled)
   const validate = (submitting = false) => {
     let error = null
-    if (!disabled) {
+    const changed = target !== prevTarget.current
+    if (!disabled && (changed || submitting)) {
       if (validator) {
-        error = validator(
-          isImmutable(target) ? target.toJS() : target,
-          submitting,
-        )
+        error = validator(target, submitting)
       } else if (required && !validators.required(target)) {
         error = { rule: 'required', labels: [label] }
       } else if (minLength) {
@@ -72,13 +70,13 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
-    const changed = !is(target, prevTarget.current)
+    const changed = target !== prevTarget.current
     if (prevTarget.current && changed && onValueChange) {
       setTimeout(onValueChange)
     }
     if (changed || (disabled !== pervDisabled.current && disabled)) {
-      prevTarget.current = target
       validate()
+      prevTarget.current = target
     }
     validateRef.current = validate
     pervDisabled.current = disabled
@@ -112,7 +110,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   )
   return {
     rest,
-    value: format(isImmutable(target) ? target.toJS() : target),
+    value: format(target),
     onChange: memoOnChange,
     error: parseError(),
     resetError,

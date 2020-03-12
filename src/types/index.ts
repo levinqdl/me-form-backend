@@ -36,6 +36,7 @@ export type FormItemProps<V = any> = {
   required?: boolean
   minLength?: number
   validator?: (value: any, submitting: boolean) => ValidatorResult
+  validatorDeps?: (val: Value) => Array<any>
   interceptor?: (value: V) => V
   parse?: (value: V) => V
   format?: (value: V) => V

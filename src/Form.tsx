@@ -8,11 +8,11 @@ import {
   Initializer,
 } from './types'
 import { XOR } from './types/typeUtils'
-import { fromJS, isImmutable, mergeDeep, setIn } from 'immutable'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
 import warning from 'warning'
+import { merge, set } from 'lodash-es'
 
 export type Value = {
   [key: string]: any
@@ -35,6 +35,7 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
         submit: () => void
         error: string
         data?: Value
+        validate: (submitting: boolean) => ValidatorResult
       }) => ReactElement<any>)
   onSubmit?: (value: Value) => void
   validator?: (value: Value) => ValidatorResult
@@ -51,11 +52,11 @@ class Form extends React.Component<Props, State> {
   initializerQueue: Array<Initializer> = []
   initialize = () => {
     const { value } = this.state
-    let nextValue = null
+    let nextValue = value
     while (this.initializerQueue.length) {
       const initializer = this.initializerQueue.shift()
       const [scope, v] = initializer()
-      nextValue = setIn(nextValue || value, scope, v)
+      set(nextValue, scope, v)
     }
     if (nextValue) {
       this.commit(nextValue)
@@ -70,14 +71,14 @@ class Form extends React.Component<Props, State> {
   }
   submit = () => {
     const { onSubmit } = this.props
-    if (!this.validate(true) && onSubmit) {
-      onSubmit(this.state.value.toJS())
+    if (!this.validate() && onSubmit) {
+      onSubmit(this.state.value)
     }
   }
   commit = (nextValue: any) => {
     const { onChange } = this.props
     if (onChange) {
-      onChange(nextValue.toJS())
+      onChange(nextValue)
     } else {
       this.setState({ value: nextValue })
     }
@@ -86,14 +87,14 @@ class Form extends React.Component<Props, State> {
     const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
     this.commit(nextValue)
   }
-  validate = (submitting = false) => {
+  validate = () => {
     let error = null
     for (const item of this.items.values()) {
-      error = item.validate(submitting) || error
+      error = item.validate(true) || error
     }
     const { validator } = this.props
-    if (!error && validator && submitting) {
-      error = validator(this.state.value.toJS()) || null
+    if (!error && validator) {
+      error = validator(this.state.value) || null
       if (error || this.state.error !== null) this.setState({ error })
     }
     return error
@@ -127,9 +128,9 @@ class Form extends React.Component<Props, State> {
     this.setState({ error: null })
   }
   getValue = () => {
-    const { value, defaultValue, initValue } = this.props
+    const { value, initValue, defaultValue } = this.props
     const v = this.isControlled() ? value : initValue
-    return fromJS(defaultValue ? mergeDeep(defaultValue, v) : v)
+    return defaultValue ? merge({}, defaultValue, v) : v
   }
   state: State = {
     value: this.getValue(),
@@ -153,10 +154,11 @@ class Form extends React.Component<Props, State> {
   }
   static getDerivedStateFromProps(props: Props, state: State) {
     if ('value' in props) {
-      const { defaultValue, value } = props
+      const { value, defaultValue } = props
+      const v = defaultValue ? merge({}, defaultValue, value) : value
       return {
         ...state,
-        value: fromJS(defaultValue ? mergeDeep(defaultValue, value) : value),
+        value: v,
       }
     } else {
       return null
@@ -171,7 +173,8 @@ class Form extends React.Component<Props, State> {
         ? children({
             submit: this.submit,
             error: parseErrorMessage(error, errorMessages),
-            data: isImmutable(value) ? value.toJS() : value,
+            data: value,
+            validate: this.validate,
           })
         : children
     return (

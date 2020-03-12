@@ -1,11 +1,12 @@
-import { is, isImmutable, fromJS, setIn } from 'immutable'
+import { get } from 'lodash-es'
 import React, { ComponentType, ReactNode } from 'react'
+import warning from 'warning'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
-import { FormItemProps, ValidatorResult, Key, DidUpdate } from '../types'
-import { appendScope, warnInterceptor, getNextValue } from '../utils'
+import { DidUpdate, FormItemProps, Key, ValidatorResult } from '../types'
+import { appendScope, getNextValue, warnInterceptor } from '../utils'
 import * as validators from '../utils/validators'
-import warning from 'warning'
+import { Value } from '../Form'
 
 type P = ContextValue & FormItemProps & { children: any; target: any }
 
@@ -14,6 +15,9 @@ interface State {
 }
 
 class FormItem extends React.Component<P, State> {
+  static defaultProps = {
+    validatorDeps: (v: Value) => [v],
+  }
   constructor(props: P) {
     super(props)
     this.state = {
@@ -30,10 +34,7 @@ class FormItem extends React.Component<P, State> {
     let error = null
     if (!disabled) {
       if (validator) {
-        error = validator(
-          isImmutable(target) ? target.toJS() : target,
-          isSubmit,
-        )
+        error = validator(target, isSubmit)
       }
     }
     this.setState({ error })
@@ -62,11 +63,23 @@ class FormItem extends React.Component<P, State> {
   componentWillUnmount() {
     this.unregister()
   }
+  changed(target: Value, prevTarget: Value) {
+    const { validatorDeps } = this.props
+    const cur = validatorDeps(target)
+    const prev = validatorDeps(prevTarget)
+    if (cur.length !== prev.length) return true
+    for (let i = 0; i < cur.length; i++) {
+      if (cur[i] !== prev[i]) {
+        return true
+      }
+    }
+    return false
+  }
   componentDidUpdate(prevProps: P) {
     const { target, disabled } = this.props
     if (
-      !is(target, prevProps.target) ||
-      (disabled !== prevProps.disabled && disabled)
+      (disabled !== prevProps.disabled && disabled) ||
+      this.changed(target, prevProps.target)
     ) {
       this.validate()
     }
@@ -124,9 +137,7 @@ class FormItem extends React.Component<P, State> {
     let nextValue = getNextValue(target, v, diffScope, didUpdate)
     if (parse || interceptor) {
       const parser = parse || interceptor || (s => s)
-      nextValue = fromJS(
-        parser(isImmutable(nextValue) ? nextValue.toJS() : nextValue),
-      )
+      nextValue = parser(nextValue)
     }
     onChange(nextValue, currentScope, currentDidUpdate)
   }
@@ -142,7 +153,7 @@ class FormItem extends React.Component<P, State> {
 
     return typeof children === 'function'
       ? children({
-          value: format(isImmutable(target) ? target.toJS() : target),
+          value: format(target),
           onChange: this.handleChange,
           error: this.getError(),
           id: scope.join('.'),
@@ -202,7 +213,7 @@ const ConnectedFormItem: ComponentType<ConnectedFormItemProps> = ({
       ...context
     }) => {
       const computedScope = appendScope(scope, name)
-      const target = value.getIn(computedScope)
+      const target = get(value, computedScope)
       return (
         <FormItem
           target={target}

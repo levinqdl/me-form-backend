@@ -193,9 +193,6 @@ describe.each([
                 <button onClick={() => form.current.validate()}>
                   validate
                 </button>
-                <button onClick={() => form.current.validate(true)}>
-                  validate all
-                </button>
               </>
             )}
           </Form>
@@ -216,12 +213,6 @@ describe.each([
       itemValidator.mockClear()
 
       fireEvent.click(getByText('validate'))
-      expect(submitValidator).not.toHaveBeenCalled()
-      expect(itemValidator).toHaveBeenLastCalledWith('xxx', false)
-      submitValidator.mockClear()
-      itemValidator.mockClear()
-
-      fireEvent.click(getByText('validate all'))
       expect(submitValidator).toHaveBeenLastCalledWith({ a: 'xxx' })
       expect(itemValidator).toHaveBeenLastCalledWith('xxx', true)
       submitValidator.mockClear()
