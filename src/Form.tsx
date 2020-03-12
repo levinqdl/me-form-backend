@@ -13,6 +13,7 @@ import parseErrorMessage from './parseErrorMessage'
 import { getNextValue } from './utils'
 import warning from 'warning'
 import { merge, set } from 'lodash-es'
+import produce from 'immer'
 
 export type Value = {
   [key: string]: any
@@ -35,6 +36,7 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
         submit: () => void
         error: string
         data?: Value
+        validate: (submitting: boolean) => ValidatorResult
       }) => ReactElement<any>)
   onSubmit?: (value: Value) => void
   validator?: (value: Value) => ValidatorResult
@@ -55,7 +57,9 @@ class Form extends React.Component<Props, State> {
     while (this.initializerQueue.length) {
       const initializer = this.initializerQueue.shift()
       const [scope, v] = initializer()
-      nextValue = set(nextValue || value, scope, v)
+      nextValue = produce(nextValue || value, draft => {
+        set(draft, scope, v)
+      })
     }
     if (nextValue) {
       this.commit(nextValue)
@@ -173,6 +177,7 @@ class Form extends React.Component<Props, State> {
             submit: this.submit,
             error: parseErrorMessage(error, errorMessages),
             data: value,
+            validate: this.validate,
           })
         : children
     return (

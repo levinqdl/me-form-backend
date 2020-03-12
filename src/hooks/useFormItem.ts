@@ -51,7 +51,8 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   const pervDisabled = useRef(disabled)
   const validate = (submitting = false) => {
     let error = null
-    if (!disabled) {
+    const changed = target !== prevTarget.current
+    if (!disabled && (changed || submitting)) {
       if (validator) {
         error = validator(target, submitting)
       } else if (required && !validators.required(target)) {

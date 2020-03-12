@@ -21,10 +21,6 @@ interface Props {
 }
 
 const ArrayField = ({ name, children, getKey, initValue }: Props) => {
-  const patchInitValue = useRef(initValue ? true : false)
-  useEffect(() => {
-    patchInitValue.current = false
-  }, [])
   const items = useRef([])
   const {
     value,
@@ -52,7 +48,11 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
       },
     })
   }, [id])
-  const v = get(value, computedScope, initValue ?? value)
+  const v = computedScope.length === 0 ? value : get(value, computedScope)
+  const patchInitValue = useRef(v === void 0 && initValue ? true : false)
+  useEffect(() => {
+    patchInitValue.current = false
+  }, [])
   useEffect(() => {
     if (v === void 0 && initValue !== void 0) {
       enqueueInitializer(() => [computedScope, initValue])
