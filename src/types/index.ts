@@ -10,7 +10,7 @@ interface ChildParams {
   value: any
 }
 
-type Label = ReactNode
+export type Label = ReactNode
 
 export interface ValidatorResult {
   rule: string
@@ -32,7 +32,7 @@ export type DidUpdate = (
 
 export type FormItemProps<V = any> = {
   name?: string
-  label?: string
+  label?: Label
   required?: boolean
   minLength?: number
   validator?: (value: any, submitting: boolean) => ValidatorResult

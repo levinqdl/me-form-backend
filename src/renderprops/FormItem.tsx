@@ -85,10 +85,10 @@ class FormItem extends React.Component<P, State> {
     }
   }
   getError() {
-    const { errorMessages } = this.props
+    const { errorMessages, label } = this.props
     const { error } = this.state
     if (error) {
-      const message = parseErrorMessage(error, errorMessages)
+      const message = parseErrorMessage(error, errorMessages, label)
       return {
         message,
         ...error,

@@ -11,7 +11,7 @@ import Form from './Form'
 import Input from './hooks/Input'
 import ArrayField from './renderprops/ArrayField'
 import FormItem from './renderprops/FormItem'
-import { FormItemProps } from './types'
+import { FormItemProps, Label } from './types'
 
 afterEach(cleanup)
 
@@ -310,10 +310,10 @@ describe.each([
       )
       expect(input).toHaveAttribute('value', 'f1 changed')
     })
-    test('errorMessages at Form', () => {
+    test('errorMessages', () => {
       const { getByText } = render(
         <Form
-          initValue={{ g1: { a: 'a', b: 'b', c: '' }, g2: { c: '', d: '' } }}
+          initValue={{ g1: { a: '', b: 'b', c: '' } }}
           errorMessages={{
             equal: ([a, b]) => `${a} and ${b} should be same`,
             required: ([label]) => `${label} is required`,
@@ -330,7 +330,16 @@ describe.each([
                 {({ error }) => (
                   <>
                     <Input name="c" label="lc" required />
-                    <Input name="a" label="la" required />
+                    <Input
+                      name="a"
+                      label="la"
+                      validator={(v: string) =>
+                        v === '' ? { rule: 'required' } : null
+                      }
+                      errorMessages={{
+                        required: ([label]: [Label]) => <>{label} is missing</>,
+                      }}
+                    />
                     <Input name="b" label="lb" required />
                     {error && <span>{error.message}</span>}
                   </>
@@ -342,8 +351,9 @@ describe.each([
         </Form>,
       )
       fireEvent.click(getByText('submit'))
-      getByText('lc is required')
-      getByText('la and lb should be same')
+      getByText('lc is required') // upper errorMessages used, get label from Input props
+      getByText('la and lb should be same') // upper errorMessages used, use label from error descriptor returned from validator
+      getByText('la is missing') // errorMessages overrided, label not specified in error descriptor returned from validator, get label from Input props
     })
     it('interceptor transform changed value', () => {
       const { getByLabelText } = render(

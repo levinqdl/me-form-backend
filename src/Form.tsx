@@ -172,7 +172,7 @@ class Form extends React.Component<Props, State> {
       typeof children === 'function'
         ? children({
             submit: this.submit,
-            error: parseErrorMessage(error, errorMessages),
+            error: parseErrorMessage(error, errorMessages, ''),
             data: value,
             validate: this.validate,
           })

@@ -212,7 +212,7 @@ ErrorMessages is an object, which keys are validator rules and values are corres
 
 Value can be a plain string or a function which receive field labels and return a string.
 
-ErrorMessages can be config at multiple level: Form, FormItem or Control, it is merged from top level to deepest level, and later one override message of the smae rule.
+ErrorMessages can be config at multiple level: Form, FormItem or Control, it is merged top down, a later one overrides smae rule.
 
 ### Trigger timing
 

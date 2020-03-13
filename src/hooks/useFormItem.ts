@@ -91,10 +91,14 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }, [name])
   const parseError = () => {
     if (error) {
-      const message = parseErrorMessage(error, {
-        ...errorMessages,
-        ...ctxErrorMessages,
-      })
+      const message = parseErrorMessage(
+        error,
+        {
+          ...ctxErrorMessages,
+          ...errorMessages,
+        },
+        label,
+      )
       return {
         message,
         ...error,
