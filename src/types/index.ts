@@ -19,7 +19,7 @@ export interface ValidatorResult {
 }
 
 export interface ErrorMessages {
-  [key: string]: string | ((labels: Label[]) => string)
+  [key: string]: string | ((labels: Label[]) => Label)
 }
 
 export type Patch = (payload: Partial<Value>, removeKey?: string) => void
