@@ -2,7 +2,7 @@ import React, { ReactNode, useRef, useContext, useEffect } from 'react'
 import Context from '../Context'
 import { Validatable } from '../types'
 import { Value } from '../Form'
-import { get, set } from 'lodash-es'
+import { getIn, setIn } from '../utils'
 
 const { Provider } = Context
 
@@ -47,7 +47,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
       },
     })
   }, [id])
-  const v = computedScope.length === 0 ? value : get(value, computedScope)
+  const v = getIn(value, computedScope)
   const patchInitValue = useRef(v === void 0 && initValue ? true : false)
   useEffect(() => {
     patchInitValue.current = false
@@ -65,7 +65,7 @@ const ArrayField = ({ name, children, getKey, initValue }: Props) => {
         key={key}
         value={{
           value: patchInitValue.current
-            ? set(value, computedScope, initValue)
+            ? setIn(value, computedScope, initValue)
             : value,
           scope: [...computedScope, index],
           onChange,

@@ -9,9 +9,8 @@ import {
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
-import { appendScope, warnInterceptor } from '../utils'
+import { appendScope, warnInterceptor, getIn } from '../utils'
 import * as validators from '../utils/validators'
-import { get } from 'lodash-es'
 
 // TODO: define return type
 const useFormItem: (formProps: FormItemProps) => any = props => {
@@ -44,7 +43,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   } = useContext(Context)
   const [error, setError] = useState(null)
   const computedScope = useMemo(() => appendScope(scope, name), [scope, name])
-  const v = get(value, computedScope)
+  const v = getIn(value, computedScope)
   const target = v === void 0 ? initValue : v
 
   const prevTarget = useRef(target)

@@ -10,9 +10,9 @@ import {
 import { XOR } from './types/typeUtils'
 import { Validatable } from './types'
 import parseErrorMessage from './parseErrorMessage'
-import { getNextValue } from './utils'
+import { getNextValue, setIn } from './utils'
 import warning from 'warning'
-import { merge, set } from 'lodash-es'
+import { merge } from 'lodash-es'
 
 export type Value = {
   [key: string]: any
@@ -56,7 +56,7 @@ class Form extends React.Component<Props, State> {
     while (this.initializerQueue.length) {
       const initializer = this.initializerQueue.shift()
       const [scope, v] = initializer()
-      set(nextValue, scope, v)
+      setIn(nextValue, scope, v)
     }
     if (nextValue) {
       this.commit(nextValue)

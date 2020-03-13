@@ -4,11 +4,18 @@ import warning from 'warning'
 import { Value } from '../Form'
 import { DidUpdate, Patch } from '../types'
 
-const setIn = (object: Object, path: Key[], value: any) => {
+export const setIn = (object: Object, path: Key[], value: any) => {
   if (path.length === 0) {
     return Object.assign(object, value)
   }
   return set(object, path, value)
+}
+
+export const getIn = (object: Object, path: Key[]) => {
+  if (path.length === 0) {
+    return object
+  }
+  return get(object, path)
 }
 
 const patch = (

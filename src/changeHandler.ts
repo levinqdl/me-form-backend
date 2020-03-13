@@ -1,4 +1,4 @@
-import { set } from 'lodash-es'
+import { setIn } from './utils'
 
 export default (
   value: any,
@@ -7,5 +7,5 @@ export default (
   interceptor: (v: any) => any = v => v,
 ) => (input: any) => {
   const v = interceptor(input)
-  onChange(name !== undefined && name !== '' ? set(value, name, v) : v)
+  onChange(name !== undefined && name !== '' ? setIn(value, [name], v) : v)
 }

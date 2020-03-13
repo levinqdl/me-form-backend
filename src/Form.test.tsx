@@ -53,6 +53,14 @@ describe.each([
       const zero = getByLabelText('zero')
       expect(zero).toHaveAttribute('value', 'zero')
     })
+    test('Input without name', () => {
+      const { getByDisplayValue } = render(
+        <Form initValue={{ a: 'hello world' }}>
+          <Input format={({ a }: any) => a} />
+        </Form>,
+      )
+      getByDisplayValue('hello world')
+    })
     test('change value is not primary type', () => {
       const Container = () => (
         <Form initValue={{ data: [] }}>

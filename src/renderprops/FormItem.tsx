@@ -1,10 +1,9 @@
-import { get } from 'lodash-es'
 import React, { ComponentType, ReactNode } from 'react'
 import warning from 'warning'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { DidUpdate, FormItemProps, Key, ValidatorResult } from '../types'
-import { appendScope, getNextValue, warnInterceptor } from '../utils'
+import { appendScope, getNextValue, warnInterceptor, getIn } from '../utils'
 import * as validators from '../utils/validators'
 import { Value } from '../Form'
 
@@ -213,7 +212,7 @@ const ConnectedFormItem: ComponentType<ConnectedFormItemProps> = ({
       ...context
     }) => {
       const computedScope = appendScope(scope, name)
-      const target = get(value, computedScope)
+      const target = getIn(value, computedScope)
       return (
         <FormItem
           target={target}
