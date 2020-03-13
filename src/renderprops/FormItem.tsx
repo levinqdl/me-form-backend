@@ -29,31 +29,26 @@ class FormItem extends React.Component<P, State> {
       childrenError = item.validate(isSubmit) || childrenError
     }
     const { target, disabled } = this.props
-    const validator = this.getValidator()
+    const { validator, required, minLength, label } = this.props
     let error = null
     if (!disabled) {
       if (validator) {
         error = validator(target, isSubmit)
       }
+      if (!error && required) {
+        error = validators.required(target)
+          ? null
+          : { rule: 'required', labels: [label] }
+      }
+      if (!error && minLength) {
+        error =
+          target?.length < minLength
+            ? { rule: 'minLength', labels: [label] }
+            : null
+      }
     }
     this.setState({ error })
     return error || childrenError
-  }
-  getValidator() {
-    const { validator, required, minLength, label } = this.props
-    if (required) {
-      return (value: string) =>
-        validators.required(value)
-          ? null
-          : { rule: 'required', labels: [label] }
-    }
-    if (minLength) {
-      return (value: string) =>
-        value.length >= minLength
-          ? null
-          : { rule: 'minLength', labels: [label] }
-    }
-    return validator
   }
   unregister: () => void
   componentDidMount() {

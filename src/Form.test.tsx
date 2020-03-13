@@ -15,7 +15,9 @@ import { FormItemProps, Label } from './types'
 
 afterEach(cleanup)
 
-const errorMessages = { required: 'f1 is required' }
+const errorMessages = {
+  required: ([label]: [Label]) => <>{label} is required</>,
+}
 
 describe.each([
   ['render props', require('./renderprops/Input').default],
@@ -108,17 +110,23 @@ describe.each([
     })
     test('predefined validator: required', () => {
       const { queryByText, getByLabelText, getByText } = render(
-        <Form initValue={{ f1: '' }}>
-          <Input label="f1" name="f1" required errorMessages={errorMessages} />
+        <Form
+          initValue={{ f1: 'xxx', f2: 'yyy' }}
+          errorMessages={errorMessages}
+        >
+          <Input label="f1" name="f1" required />
+          <Input label="f2" name="f2" required validator={(): null => null} />
         </Form>,
       )
       expect(queryByText('f1 is required')).toBeNull()
       const input = getByLabelText('f1')
-      fireEvent.change(input, { target: { value: 'xxx' } })
       fireEvent.change(input, { target: { value: '' } })
       getByText('f1 is required')
       fireEvent.change(input, { target: { value: 0 } })
       expect(queryByText('f1 is required')).toBeNull()
+      const input2 = getByLabelText('f2')
+      fireEvent.change(input2, { target: { value: '' } })
+      getByText('f2 is required')
     })
     test('default error message is rule name', () => {
       const { queryByText, getByLabelText, getByText } = render(
@@ -290,6 +298,7 @@ describe.each([
               label="f1"
               name="f1"
               minLength={5}
+              validator={(): null => null}
               errorMessages={{ minLength: 'length should not less than 5' }}
             />
           )}

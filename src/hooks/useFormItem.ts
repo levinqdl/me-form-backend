@@ -54,9 +54,11 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     if (!disabled && (changed || submitting)) {
       if (validator) {
         error = validator(target, submitting)
-      } else if (required && !validators.required(target)) {
+      }
+      if (!error && required && !validators.required(target)) {
         error = { rule: 'required', labels: [label] }
-      } else if (minLength) {
+      }
+      if (!error && minLength) {
         error =
           target.length >= minLength
             ? null
