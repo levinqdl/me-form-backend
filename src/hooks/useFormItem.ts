@@ -49,25 +49,32 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   const prevTarget = useRef(target)
   const pervDisabled = useRef(disabled)
   const validate = (submitting = false) => {
-    let error = null
+    if (disabled) {
+      if (error !== null) setError(null)
+      return null
+    }
+    let currentError = error
     const changed = target !== prevTarget.current
-    if (!disabled && (changed || submitting)) {
+
+    if (changed || submitting) {
+      currentError = null
       if (validator) {
-        error = validator(target, submitting)
+        currentError = validator(target, submitting)
       }
-      if (!error && required && !validators.required(target)) {
-        error = { rule: 'required', labels: [label] }
+      if (!currentError && required && !validators.required(target)) {
+        currentError = { rule: 'required', labels: [label] }
       }
-      if (!error && minLength) {
-        error =
+      if (!currentError && minLength) {
+        currentError =
           target.length >= minLength
             ? null
             : { rule: 'minLength', labels: [label] }
       }
     }
-
-    setError(error)
-    return error
+    if (currentError !== error) {
+      setError(currentError)
+    }
+    return currentError
   }
   const validateRef = useRef(validate)
   useEffect(() => {

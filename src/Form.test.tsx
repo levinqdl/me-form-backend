@@ -165,6 +165,31 @@ describe.each([
       getByText('f1 required')
       expect(queryByText('f2 required')).toBeNull()
     })
+    test('error message should keep while changing other fileds', () => {
+      const { queryByText, getByLabelText, getByText } = render(
+        <Form initValue={{ f1: 'xxx', f2: 'yyy' }}>
+          <FormItem>
+            <Input
+              label="f1"
+              name="f1"
+              required
+              errorMessages={{ required: 'f1 required' }}
+            />
+            <Input
+              label="f2"
+              name="f2"
+              required
+              errorMessages={{ required: 'f2 required' }}
+            />
+          </FormItem>
+        </Form>,
+      )
+      fireEvent.change(getByLabelText('f2'), { target: { value: '' } })
+      getByText('f2 required')
+
+      fireEvent.change(getByLabelText('f1'), { target: { value: 'xx' } })
+      getByText('f2 required')
+    })
     test('validator not triggered on disabled item', () => {
       const Contianer = ({ disabled }: any) => {
         return (
