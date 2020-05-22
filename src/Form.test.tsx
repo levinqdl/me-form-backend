@@ -91,6 +91,34 @@ describe.each([
       fireEvent.click(getByText('remove'))
       expect(queryByText('index 0')).toBeNull()
     })
+    test.only('NaN as value', () => {
+      let count = 0
+      const validator = jest.fn(() => {
+        // if (count === 0) {
+        // count++
+        return { rule: 'NaN' }
+        // } else
+        // throw new Error('validator called twice')
+      })
+      const Container = () => {
+        const [value, setValue] = useState({ f1: 1 })
+        return (
+          <Form value={value} onChange={setValue}>
+            <Input label="f1" name="f1" validator={validator} />
+            <button onClick={() => setValue({ f1: NaN })}>Set NaN</button>
+          </Form>
+        )
+      }
+      const { getByText } = render(<Container />)
+      fireEvent.click(getByText('Set NaN'))
+      expect(validator).toHaveBeenCalledTimes(1)
+      // return new Promise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     expect(validator).toHaveBeenCalledTimes(1)
+      //     resolve()
+      //   }, 1000)
+      // })
+    })
     test('validator triggered after touched', () => {
       const { getByLabelText, queryByText, getByText } = render(
         <Form initValue={{ f1: '' }}>
