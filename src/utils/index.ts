@@ -64,3 +64,10 @@ export const warnInterceptor = ({ interceptor, parse }: any) => {
     '`parse` and `interceptor` are both provided, interceptor will be ignored',
   )
 }
+
+export const isChanged = (a: any, b: any) => {
+  if (Number.isNaN(a) && Number.isNaN(b)) {
+    return false
+  }
+  return a !== b
+}

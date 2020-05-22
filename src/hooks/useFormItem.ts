@@ -9,7 +9,7 @@ import {
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { FormItemProps } from '../types'
-import { appendScope, warnInterceptor, getIn } from '../utils'
+import { appendScope, warnInterceptor, getIn, isChanged } from '../utils'
 import * as validators from '../utils/validators'
 
 // TODO: define return type
@@ -54,7 +54,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
       return null
     }
     let currentError = error
-    const changed = target !== prevTarget.current
+    const changed = isChanged(target, prevTarget.current)
 
     if (changed || submitting) {
       currentError = null
@@ -78,7 +78,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const validateRef = useRef(validate)
   useEffect(() => {
-    const changed = target !== prevTarget.current
+    const changed = isChanged(target, prevTarget.current)
     if (prevTarget.current && changed && onValueChange) {
       setTimeout(onValueChange)
     }

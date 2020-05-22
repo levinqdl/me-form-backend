@@ -3,7 +3,13 @@ import warning from 'warning'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
 import { DidUpdate, FormItemProps, Key, ValidatorResult } from '../types'
-import { appendScope, getNextValue, warnInterceptor, getIn } from '../utils'
+import {
+  appendScope,
+  getNextValue,
+  warnInterceptor,
+  getIn,
+  isChanged,
+} from '../utils'
 import * as validators from '../utils/validators'
 import { Value } from '../Form'
 
@@ -63,7 +69,7 @@ class FormItem extends React.Component<P, State> {
     const prev = validatorDeps(prevTarget)
     if (cur.length !== prev.length) return true
     for (let i = 0; i < cur.length; i++) {
-      if (cur[i] !== prev[i]) {
+      if (isChanged(cur[i], prev[i])) {
         return true
       }
     }
