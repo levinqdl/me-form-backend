@@ -1,4 +1,4 @@
-import { get, merge, set, unset, clone } from 'lodash-es'
+import { get, assign, set, unset, clone } from 'lodash-es'
 import { Key } from 'react'
 import warning from 'warning'
 import { Value } from '../Form'
@@ -24,7 +24,7 @@ const patch = (
   ref: { nextValue: any },
 ): Patch => (payload, removeKey) => {
   const fragment = get(value, keyPath, {})
-  const nextFragment = merge(fragment, payload)
+  const nextFragment = assign(fragment, payload)
   let nextValue = setIn(value, keyPath, nextFragment)
   if (removeKey) {
     unset(nextValue, removeKey)

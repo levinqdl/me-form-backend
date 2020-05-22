@@ -454,7 +454,7 @@ describe.each([
       test('uncontrolled mode', () => {
         const Container = () => {
           return (
-            <Form initValue={{ a: '', b: '', c: 'c' }}>
+            <Form initValue={{ a: '', b: '', c: 'c', d: 'd' }}>
               {({ data }) => (
                 <>
                   <Input
@@ -465,7 +465,7 @@ describe.each([
                       patch: (v: any, removePath?: string) => void,
                     ) => {
                       if (changedValue === '0') {
-                        patch({ b: 'false' }, 'c')
+                        patch({ b: 'false', d: void 0 }, 'c')
                       } else {
                         patch({ b: 'true' })
                       }
@@ -473,6 +473,7 @@ describe.each([
                   />
                   <Input name="b" label="b" />
                   <span>c is {'c' in data ? data.c : 'removed'}</span>
+                  <span>d is {data.d ?? 'missing'}</span>
                 </>
               )}
             </Form>
@@ -483,6 +484,7 @@ describe.each([
         fireEvent.change(getByLabelText('a'), { target: { value: '0' } })
         expect(getByLabelText('b')).toHaveAttribute('value', 'false')
         getByText('c is removed')
+        getByText('d is missing')
         fireEvent.change(getByLabelText('a'), { target: { value: '1' } })
         expect(getByLabelText('b')).toHaveAttribute('value', 'true')
       })
