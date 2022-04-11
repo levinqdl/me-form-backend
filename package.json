@@ -32,6 +32,10 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "typescript": "^3.7.5"
   },
+  "peerDependencies": {
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2"
+  },
   "scripts": {
     "start": "rollup -c rollup.config.js -w",
     "test": "jest",
