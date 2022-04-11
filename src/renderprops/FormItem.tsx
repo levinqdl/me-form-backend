@@ -1,4 +1,4 @@
-import React, { ComponentType, ReactNode } from 'react'
+import React, { ComponentType, ReactNode, useContext, useMemo } from 'react'
 import warning from 'warning'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
@@ -203,31 +203,29 @@ const ConnectedFormItem: ComponentType<ConnectedFormItemProps> = ({
   name,
   errorMessages,
   ...props
-}) => (
-  <Context.Consumer>
-    {({
-      value,
-      scope,
-      onChange,
-      errorMessages: ctxErrorMessages,
-      ...context
-    }) => {
-      const computedScope = appendScope(scope, name)
-      const target = getIn(value, computedScope)
-      return (
-        <FormItem
-          target={target}
-          value={value}
-          scope={computedScope}
-          onChange={onChange}
-          name={name}
-          errorMessages={{ ...ctxErrorMessages, ...errorMessages }}
-          {...context}
-          {...props}
-        />
-      )
-    }}
-  </Context.Consumer>
-)
+}) => {
+  const {
+    value,
+    scope,
+    onChange,
+    errorMessages: ctxErrorMessages,
+    ...context
+  } = useContext(Context)
+  const computedScope = useMemo(() => appendScope(scope, name), [scope, name])
+  const target = getIn(value, computedScope)
+
+  return (
+    <FormItem
+      target={target}
+      value={value}
+      scope={computedScope}
+      onChange={onChange}
+      name={name}
+      errorMessages={{ ...ctxErrorMessages, ...errorMessages }}
+      {...context}
+      {...props}
+    />
+  )
+}
 
 export default ConnectedFormItem
