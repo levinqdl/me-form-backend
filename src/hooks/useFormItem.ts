@@ -8,7 +8,7 @@ import {
 } from 'react'
 import Context from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
-import { FormItemProps } from '../types'
+import { FormItemProps, DidUpdate } from '../types'
 import { appendScope, warnInterceptor, getIn, isChanged } from '../utils'
 import * as validators from '../utils/validators'
 
@@ -31,7 +31,10 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
     onValueChange,
     ...rest
   } = props
-  const parser = parse || interceptor || (v => v)
+  const parseRef = useRef<(v: any) => any>((v: any) => v)
+  parseRef.current = parse || interceptor || (v => v)
+  const didUpdateRef = useRef<DidUpdate>(() => {})
+  didUpdateRef.current = didUpdate
   const {
     value,
     onChange,
@@ -116,7 +119,7 @@ const useFormItem: (formProps: FormItemProps) => any = props => {
   }
   const memoOnChange = useCallback(
     (v: any) => {
-      onChange(parser(v), computedScope, didUpdate)
+      onChange(parseRef.current(v), computedScope, () => didUpdateRef.current)
     },
     [computedScope],
   )

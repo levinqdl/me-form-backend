@@ -1,4 +1,10 @@
-import React, { ComponentType, ReactNode, useContext, useMemo } from 'react'
+import React, {
+  ComponentType,
+  MutableRefObject,
+  ReactNode,
+  useContext,
+  useMemo,
+} from 'react'
 import warning from 'warning'
 import Context, { ContextValue } from '../Context'
 import parseErrorMessage from '../parseErrorMessage'
@@ -124,7 +130,7 @@ class FormItem extends React.Component<P, State> {
     }
     return diffScope
   }
-  handleChange = (v: any, childScope: Key[], didUpdate: DidUpdate) => {
+  handleChange = (v: any, childScope: Key[], getDidUpdate: () => DidUpdate) => {
     const {
       parse,
       interceptor,
@@ -134,12 +140,12 @@ class FormItem extends React.Component<P, State> {
       didUpdate: currentDidUpdate,
     } = this.props
     const diffScope = this.diffScope(currentScope, childScope)
-    let nextValue = getNextValue(target, v, diffScope, didUpdate)
+    let nextValue = getNextValue(target, v, diffScope, getDidUpdate?.())
     if (parse || interceptor) {
       const parser = parse || interceptor || (s => s)
       nextValue = parser(nextValue)
     }
-    onChange(nextValue, currentScope, currentDidUpdate)
+    onChange(nextValue, currentScope, () => currentDidUpdate)
   }
   renderChildren = () => {
     warnInterceptor(this.props)

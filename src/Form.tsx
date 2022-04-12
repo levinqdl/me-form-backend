@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { ReactElement, ReactNode } from 'react'
 import Context, { ContextValue } from './Context'
 import {
   ValidatorResult,
@@ -33,7 +33,7 @@ type Props = XOR<UncontrolledModeProps, ControlledModeProps> & {
     | Array<ReactElement<any>>
     | ((form: {
         submit: () => void
-        error: string
+        error: ReactNode
         data?: Value
         validate: (submitting: boolean) => ValidatorResult
       }) => ReactElement<any>)
@@ -83,8 +83,17 @@ class Form extends React.Component<Props, State> {
       this.setState({ value: nextValue })
     }
   }
-  onChange = (value: any, keyPath: Key[] = [], didUpdate?: DidUpdate) => {
-    const nextValue = getNextValue(this.state.value, value, keyPath, didUpdate)
+  onChange = (
+    value: any,
+    keyPath: Key[] = [],
+    getDidUpdate?: () => DidUpdate,
+  ) => {
+    const nextValue = getNextValue(
+      this.state.value,
+      value,
+      keyPath,
+      getDidUpdate?.(),
+    )
     this.commit(nextValue)
   }
   validate = () => {
